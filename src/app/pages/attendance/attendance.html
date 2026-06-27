@@ -1,0 +1,79 @@
+<header class="page-head">
+  <div>
+    <span>متابعة يومية</span>
+    <h1>الحضور والغياب</h1>
+  </div>
+</header>
+
+<section class="layout">
+  <div class="panel">
+    <h2>الحصص القادمة</h2>
+    @for (session of sessions(); track session.id) {
+      <button class="session" type="button" [class.active]="selectedSession() === session.id" (click)="openSheet(session.id)">
+        <strong>{{ session.groupName || 'مجموعة رقم ' + session.groupId }}</strong>
+        <span>{{ session.sessionDate | appDate }} - {{ session.startTime | appTime12 }}</span>
+      </button>
+    } @empty {
+      <p>لا توجد حصص. أنشئ حصة أو ولد حصص من صفحة المجموعات.</p>
+    }
+  </div>
+
+  <form class="panel" [formGroup]="form" (ngSubmit)="createSession()">
+    <h2>إنشاء حصة</h2>
+    <select formControlName="groupId">
+      <option [ngValue]="0">اختر المجموعة</option>
+      @for (group of groups(); track group.id) {
+        <option [ngValue]="group.id">{{ group.name }}</option>
+      }
+    </select>
+    <input formControlName="sessionDate" type="date" />
+    <app-time-picker formControlName="startTime" />
+    <button type="submit">إضافة حصة</button>
+  </form>
+</section>
+
+<section class="panel table-panel">
+  <div class="sheet-head">
+    <div>
+      <h2>كشف الحضور</h2>
+      @if (selectedSessionDetails(); as session) {
+        <span>{{ session.groupName || 'مجموعة رقم ' + session.groupId }} - {{ session.sessionDate | appDate }} - {{ session.startTime | appTime12 }}</span>
+      }
+    </div>
+    @if (loadingSheet()) {
+      <strong>تحميل...</strong>
+    }
+  </div>
+
+  @if (sheetError()) {
+    <p class="sheet-error">{{ sheetError() }}</p>
+  }
+
+  @if (sheetMessage() && !attendance().length) {
+    <p class="empty-state">{{ sheetMessage() }}</p>
+  }
+
+  <table>
+    <thead>
+      <tr>
+        <th>الطالب</th>
+        <th>الحالة الحالية</th>
+        <th>تسجيل</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of attendance(); track row.studentId) {
+        <tr>
+          <td>{{ row.studentName }}</td>
+          <td>{{ row.isPresent === true ? 'حاضر' : row.isPresent === false ? 'غائب' : 'لم يسجل' }}</td>
+          <td class="actions">
+            <button class="present" type="button" (click)="mark(row, true)">حاضر</button>
+            <button class="absent" type="button" (click)="mark(row, false)">غائب</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="3">لا توجد أسماء للعرض حاليا.</td></tr>
+      }
+    </tbody>
+  </table>
+</section>

@@ -1,0 +1,63 @@
+<div class="page-title">
+  <div>
+    <span>&#1606;&#1592;&#1585;&#1577; &#1593;&#1575;&#1605;&#1577;</span>
+    <h1>&#1604;&#1608;&#1581;&#1577; &#1575;&#1604;&#1578;&#1581;&#1603;&#1605;</h1>
+  </div>
+</div>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+<section class="metrics">
+  <article>
+    <span>&#1573;&#1580;&#1605;&#1575;&#1604;&#1610; &#1575;&#1604;&#1591;&#1604;&#1575;&#1576;</span>
+    <strong>{{ students().length }}</strong>
+  </article>
+  <article>
+    <span>&#1575;&#1604;&#1605;&#1580;&#1605;&#1608;&#1593;&#1575;&#1578; &#1575;&#1604;&#1606;&#1588;&#1591;&#1577;</span>
+    <strong>{{ groups().length }}</strong>
+  </article>
+  <article>
+    <span>&#1581;&#1589;&#1589; &#1602;&#1575;&#1583;&#1605;&#1577;</span>
+    <strong>{{ sessions().length }}</strong>
+  </article>
+  <article>
+    <span>&#1591;&#1604;&#1575;&#1576; &#1605;&#1587;&#1578;&#1576;&#1593;&#1583;&#1610;&#1606;</span>
+    <strong>{{ expelledCount() }}</strong>
+  </article>
+</section>
+
+<section class="grid">
+  <div class="panel">
+    <h2>&#1571;&#1602;&#1585;&#1576; &#1575;&#1604;&#1581;&#1589;&#1589;</h2>
+    @for (session of sessions().slice(0, 6); track session.id) {
+      <div class="row">
+        <div>
+          @if (session.groupName) {
+            <strong>{{ session.groupName }}</strong>
+          } @else {
+            <strong>&#1605;&#1580;&#1605;&#1608;&#1593;&#1577; &#1585;&#1602;&#1605; {{ session.groupId }}</strong>
+          }
+          <span>{{ session.sessionDate | appDate }} - {{ session.startTime | appTime12 }}</span>
+        </div>
+      </div>
+    } @empty {
+      <p class="empty">&#1604;&#1575; &#1578;&#1608;&#1580;&#1583; &#1581;&#1589;&#1589; &#1602;&#1575;&#1583;&#1605;&#1577; &#1581;&#1575;&#1604;&#1610;&#1575;.</p>
+    }
+  </div>
+
+  <div class="panel">
+    <h2>&#1571;&#1603;&#1576;&#1585; &#1575;&#1604;&#1605;&#1580;&#1605;&#1608;&#1593;&#1575;&#1578;</h2>
+    @for (group of groups().slice(0, 6); track group.id) {
+      <div class="row">
+        <div>
+          <strong>{{ group.name }}</strong>
+          <span>{{ group.studentCount }} &#1591;&#1575;&#1604;&#1576;</span>
+        </div>
+      </div>
+    } @empty {
+      <p class="empty">&#1575;&#1576;&#1583;&#1571; &#1576;&#1573;&#1606;&#1588;&#1575;&#1569; &#1571;&#1608;&#1604; &#1605;&#1580;&#1605;&#1608;&#1593;&#1577;.</p>
+    }
+  </div>
+</section>

@@ -1,0 +1,48 @@
+.time-picker {
+  display: grid;
+  grid-template-columns: minmax(82px, 1fr) minmax(82px, 1fr) minmax(96px, 1fr);
+  gap: 10px;
+}
+
+.time-field {
+  display: grid;
+  gap: 6px;
+}
+
+.time-field span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.time-field select {
+  min-width: 0;
+}
+
+.period-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 44px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.period-toggle button {
+  min-height: 42px;
+  border-radius: 0;
+  background: #fff;
+  color: #0f172a;
+  padding: 0;
+}
+
+.period-toggle button.active {
+  background: #0f766e;
+  color: #fff;
+}
+
+@media (max-width: 420px) {
+  .time-picker {
+    grid-template-columns: 1fr;
+  }
+}

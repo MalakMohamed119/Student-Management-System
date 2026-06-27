@@ -1,0 +1,45 @@
+<div class="shell" dir="rtl">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M3 7.5 12 3l9 4.5-9 4.5L3 7.5Z" />
+          <path d="M7 10.5v4.2c0 1.7 2.2 3.1 5 3.1s5-1.4 5-3.1v-4.2" />
+          <path d="M21 8v6" />
+        </svg>
+      </div>
+      <div>
+        <strong>&#1573;&#1583;&#1575;&#1585;&#1577; &#1575;&#1604;&#1591;&#1604;&#1575;&#1576;</strong>
+        <span>Student System</span>
+      </div>
+    </div>
+
+    <nav>
+      @for (item of navItems(); track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active">
+          <span>{{ item.icon }}</span>
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    <button class="logout" type="button" (click)="auth.logout()">&#1578;&#1587;&#1580;&#1610;&#1604; &#1575;&#1604;&#1582;&#1585;&#1608;&#1580;</button>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar">
+      <div>
+        <p>&#1605;&#1585;&#1581;&#1576;&#1575;&#1548; {{ displayName() }}</p>
+        @if (auth.user()?.role === 'Owner') {
+          <span>&#1605;&#1575;&#1604;&#1603; &#1575;&#1604;&#1606;&#1592;&#1575;&#1605;</span>
+        } @else {
+          <span>&#1605;&#1587;&#1575;&#1593;&#1583; &#1573;&#1583;&#1575;&#1585;&#1610;</span>
+        }
+      </div>
+    </header>
+
+    <section class="content">
+      <router-outlet />
+    </section>
+  </main>
+</div>

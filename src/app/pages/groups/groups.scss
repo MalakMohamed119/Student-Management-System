@@ -1,0 +1,87 @@
+@use '../shared-page' as *;
+
+.layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 16px;
+}
+
+form,
+.cards {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.days label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.days label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+}
+
+.time-grid,
+.card-head {
+  display: grid;
+  gap: 10px;
+}
+
+.time-grid {
+  grid-template-columns: 1fr;
+}
+
+.card-head {
+  grid-template-columns: 1fr auto;
+}
+
+.card-head {
+  align-items: start;
+}
+
+.card-head p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+.schedule {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.schedule span {
+  background: #ecfeff;
+  color: #155e75;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.groups-page input[type="checkbox"],
+.days-list input[type="checkbox"],
+.day-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+@media (max-width: 1050px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

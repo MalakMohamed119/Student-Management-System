@@ -1,0 +1,56 @@
+<header class="page-head">
+  <div>
+    <span>بيانات المستخدم</span>
+    <h1>حسابي</h1>
+  </div>
+</header>
+
+<section class="settings-layout">
+  <aside class="profile-card">
+    <label class="avatar-upload">
+      <span class="avatar">
+        @if (photoUrl() && !imageFailed()) {
+          <img [src]="photoUrl()" alt="" (error)="imageFailed.set(true)" />
+        } @else {
+          <span>{{ fallbackInitial() }}</span>
+        }
+      </span>
+      <span class="upload-text">تغيير الصورة</span>
+      <input type="file" accept="image/*" (change)="uploadPhoto($any($event.target).files?.[0])" />
+    </label>
+
+    <div class="profile-summary">
+      <strong>{{ form.controls.fullName.value || auth.user()?.username }}</strong>
+      <span>{{ auth.user()?.username }}</span>
+      <b>{{ roleLabel() }}</b>
+    </div>
+  </aside>
+
+  <form class="panel account-form" [formGroup]="form" (ngSubmit)="save()">
+    <div class="form-head">
+      <div>
+        <span>إعدادات الحساب</span>
+        <h2>البيانات الشخصية</h2>
+      </div>
+    </div>
+
+    <label>
+      <span>الاسم الكامل</span>
+      <input formControlName="fullName" placeholder="الاسم الكامل" />
+    </label>
+
+    <label>
+      <span>رقم الهاتف</span>
+      <input formControlName="phone" placeholder="رقم الهاتف" />
+    </label>
+
+    <button type="submit">حفظ الحساب</button>
+
+    @if (saved()) {
+      <span class="success">{{ saved() }}</span>
+    }
+    @if (error()) {
+      <span class="error-text">{{ error() }}</span>
+    }
+  </form>
+</section>

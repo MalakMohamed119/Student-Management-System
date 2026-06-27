@@ -1,0 +1,27 @@
+<div class="time-picker">
+  <label class="time-field">
+    <span>الساعة</span>
+    <select [disabled]="disabled" [value]="hour" (change)="setHour($any($event.target).value)">
+      @for (item of hours; track item) {
+        <option [value]="item">{{ item }}</option>
+      }
+    </select>
+  </label>
+
+  <label class="time-field">
+    <span>الدقيقة</span>
+    <select [disabled]="disabled" [value]="minute" (change)="setMinute($any($event.target).value)">
+      @for (item of minutes; track item) {
+        <option [value]="item">{{ item }}</option>
+      }
+    </select>
+  </label>
+
+  <div class="time-field">
+    <span>الفترة</span>
+    <div class="period-toggle">
+      <button type="button" [class.active]="period === 'AM'" [disabled]="disabled" (click)="setPeriod('AM')">ص</button>
+      <button type="button" [class.active]="period === 'PM'" [disabled]="disabled" (click)="setPeriod('PM')">م</button>
+    </div>
+  </div>
+</div>

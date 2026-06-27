@@ -1,0 +1,138 @@
+@use '../shared-page' as *;
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(320px, 620px);
+  gap: 16px;
+  align-items: start;
+}
+
+.profile-card,
+.account-form {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.profile-card {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding: 22px;
+}
+
+.avatar-upload {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  cursor: pointer;
+}
+
+.avatar {
+  width: 112px;
+  height: 112px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  background: #ecfeff;
+  color: #155e75;
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  font-weight: 900;
+  border: 1px solid #dbe3ef;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-upload input {
+  display: none;
+}
+
+.upload-text {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: #eef2f7;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.profile-summary {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.profile-summary strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.profile-summary span {
+  color: #64748b;
+  font-weight: 800;
+}
+
+.profile-summary b {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: #ecfeff;
+  color: #155e75;
+  font-size: 13px;
+}
+
+.account-form {
+  display: grid;
+  gap: 16px;
+  padding: 22px;
+}
+
+.form-head {
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.form-head span {
+  color: #0f766e;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.form-head h2 {
+  margin-top: 4px;
+}
+
+.account-form label {
+  display: grid;
+  gap: 7px;
+  color: #475569;
+  font-weight: 900;
+}
+
+.success {
+  color: #166534;
+  font-weight: 900;
+}
+
+.error-text {
+  color: #b91c1c;
+  font-weight: 900;
+}
+
+@media (max-width: 900px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+}

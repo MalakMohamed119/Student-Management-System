@@ -1,0 +1,97 @@
+@use '../shared-page' as *;
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+form,
+.panel:first-child {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.session {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  color: #111827;
+}
+
+.session span {
+  color: #64748b;
+}
+
+.session.active {
+  border-color: #0f766e;
+  background: #f0fdfa;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sheet-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sheet-head span {
+  display: block;
+  margin-top: 6px;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.sheet-head strong {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: #ecfeff;
+  color: #155e75;
+}
+
+.empty-state,
+.sheet-error {
+  margin: 0 0 12px;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 900;
+}
+
+.empty-state {
+  background: #f8fafc;
+  color: #475569;
+}
+
+.sheet-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.present {
+  background: #0f766e;
+}
+
+.absent {
+  background: #dc2626;
+}
+
+@media (max-width: 1050px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

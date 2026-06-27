@@ -1,0 +1,66 @@
+<main class="auth-page">
+  <section class="auth-panel">
+    <div class="auth-container">
+      <div class="auth-header">
+        <span>نظام إدارة الطلاب</span>
+        <h1>تسجيل الدخول</h1>
+        <p>سجل دخولك وابدأ رحلة النجاح في إدارة الطلاب بثقة وسهولة.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="mode-switch" aria-label="نوع الحساب">
+          <button type="button" [class.active]="accountType() === 'Owner'" (click)="setAccountType('Owner')">مالك</button>
+          <button type="button" [class.active]="accountType() === 'Admin'" (click)="setAccountType('Admin')">أدمن</button>
+        </div>
+
+        <label>
+          اسم المستخدم
+          <input class="plain-input" formControlName="username" autocomplete="username" />
+        </label>
+
+        <label>
+          كلمة المرور
+          <span class="input-icon">
+            <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 10V8a5 5 0 0 1 10 0v2h1.5A1.5 1.5 0 0 1 20 11.5v8A1.5 1.5 0 0 1 18.5 21h-13A1.5 1.5 0 0 1 4 19.5v-8A1.5 1.5 0 0 1 5.5 10H7Zm2 0h6V8a3 3 0 0 0-6 0v2Zm3 7a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+            </svg>
+            <input formControlName="password" [type]="showPassword() ? 'text' : 'password'" autocomplete="current-password" />
+            <button class="eye-button" type="button" (click)="showPassword.set(!showPassword())" aria-label="إظهار أو إخفاء كلمة المرور">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 5c5 0 8.5 4.2 9.7 6.1.3.5.3 1.3 0 1.8C20.5 14.8 17 19 12 19s-8.5-4.2-9.7-6.1a1.8 1.8 0 0 1 0-1.8C3.5 9.2 7 5 12 5Zm0 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-2.2a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6Z" />
+              </svg>
+            </button>
+          </span>
+        </label>
+
+        @if (accountType() === 'Owner') {
+          <label>
+            كود PIN
+            <span class="input-icon">
+              <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm2 4v2h2V8H9Zm4 0v2h2V8h-2Zm-4 4v2h2v-2H9Zm4 0v2h2v-2h-2Zm-4 4v2h6v-2H9Z" />
+              </svg>
+              <input formControlName="pin" [type]="showPin() ? 'text' : 'password'" inputmode="numeric" maxlength="4" />
+              <button class="eye-button" type="button" (click)="showPin.set(!showPin())" aria-label="إظهار أو إخفاء كود PIN">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 5c5 0 8.5 4.2 9.7 6.1.3.5.3 1.3 0 1.8C20.5 14.8 17 19 12 19s-8.5-4.2-9.7-6.1a1.8 1.8 0 0 1 0-1.8C3.5 9.2 7 5 12 5Zm0 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-2.2a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6Z" />
+                </svg>
+              </button>
+            </span>
+          </label>
+          <p class="hint">حساب المالك يحتاج كلمة المرور وPIN في نفس عملية الدخول.</p>
+        } @else {
+          <p class="hint">الأدمن يتم إنشاؤه من حساب المالك ويستخدم اسم المستخدم وكلمة المرور.</p>
+        }
+
+        @if (error()) {
+          <p class="error">{{ error() }}</p>
+        }
+
+        <button class="submit-button" type="submit" [disabled]="loading() || !canSubmit()">
+          {{ loading() ? 'جارِ الدخول...' : 'دخول النظام' }}
+        </button>
+      </form>
+    </div>
+  </section>
+</main>

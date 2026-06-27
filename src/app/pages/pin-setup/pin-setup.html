@@ -1,0 +1,11 @@
+<div class="pin-card">
+  <h1>إعداد الدخول السريع</h1>
+  <p>اختر كود PIN من 4 أرقام لتسجيل الدخول بسرعة في المرات القادمة.</p>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <input formControlName="pin" inputmode="numeric" maxlength="4" placeholder="1234" />
+    @if (error()) {
+      <span>{{ error() }}</span>
+    }
+    <button type="submit">حفظ الكود</button>
+  </form>
+</div>

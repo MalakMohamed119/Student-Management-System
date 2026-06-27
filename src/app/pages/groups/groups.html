@@ -1,0 +1,62 @@
+<header class="page-head">
+  <div>
+    <span>تنظيم المواعيد</span>
+    <h1>المجموعات</h1>
+  </div>
+</header>
+
+<section class="layout">
+  <form class="panel" [formGroup]="form" (ngSubmit)="save()">
+    <h2>مجموعة جديدة</h2>
+    <input formControlName="name" placeholder="اسم المجموعة" />
+    <textarea formControlName="description" placeholder="وصف مختصر"></textarea>
+
+    <div class="days">
+      @for (day of weekdays; track day.value) {
+        <label>
+          <input type="checkbox" [checked]="form.controls.weekdays.value.includes(day.value)" (change)="setDay(day.value, $any($event.target).checked)" />
+          {{ day.label }}
+        </label>
+      }
+    </div>
+
+    <div class="time-grid">
+      <label>
+        بداية الوقت
+        <app-time-picker formControlName="startTime" />
+      </label>
+      <label>
+        نهاية الوقت
+        <app-time-picker formControlName="endTime" />
+      </label>
+    </div>
+    <button type="submit">إنشاء المجموعة</button>
+  </form>
+
+  <div class="cards">
+    @for (group of groups(); track group.id) {
+      <article class="panel">
+        <div class="card-head">
+          <div>
+            <h2>{{ group.name }}</h2>
+            <p>{{ group.description || 'بدون وصف' }}</p>
+          </div>
+          <strong>{{ group.studentCount }} طالب</strong>
+        </div>
+        <div class="schedule">
+          @for (day of group.groupDays; track day.id) {
+            <span>{{ weekdays[day.weekday - 1].label }} {{ day.startTime | appTime12 }} - {{ day.endTime | appTime12 }}</span>
+          }
+        </div>
+        <div class="row-actions">
+          <button class="ghost" type="button" (click)="generate(group.id)">توليد حصص 30 يوم</button>
+          @if (auth.isOwner()) {
+            <button class="danger" type="button" (click)="deleteGroup(group)">حذف المجموعة</button>
+          }
+        </div>
+      </article>
+    } @empty {
+      <p class="panel">لا توجد مجموعات بعد.</p>
+    }
+  </div>
+</section>

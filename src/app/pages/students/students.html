@@ -1,0 +1,96 @@
+<header class="page-head">
+  <div>
+    <span>إدارة الطلاب</span>
+    <h1>الطلاب</h1>
+  </div>
+</header>
+
+<section class="toolbar">
+  <input placeholder="ابحث بالاسم أو رقم الهاتف" #query (input)="search(query.value)" />
+  <div class="tabs">
+    <button type="button" [class.active]="status() === ''" (click)="load()">الكل</button>
+    <button type="button" [class.active]="status() === 'active'" (click)="load('active')">نشط</button>
+    <button type="button" [class.active]="status() === 'expelled'" (click)="load('expelled')">مستبعد</button>
+  </div>
+</section>
+
+<section class="layout">
+  <form class="panel" [formGroup]="form" (ngSubmit)="save()">
+    <h2>{{ editingStudentId() ? 'تعديل طالب' : 'إضافة طالب' }}</h2>
+    <input formControlName="name" placeholder="اسم الطالب" />
+    <input formControlName="studentPhone" placeholder="هاتف الطالب" />
+    <input formControlName="guardianPhone" placeholder="هاتف ولي الأمر" />
+    <select formControlName="gender">
+      <option value="Male">ذكر</option>
+      <option value="Female">أنثى</option>
+    </select>
+    <select formControlName="groupId">
+      <option [ngValue]="0">بدون مجموعة</option>
+      @for (group of groups(); track group.id) {
+        <option [ngValue]="group.id">{{ group.name }}</option>
+      }
+    </select>
+    <textarea formControlName="notes" placeholder="ملاحظات"></textarea>
+    <div class="form-actions">
+      <button type="submit">{{ editingStudentId() ? 'حفظ التعديل' : 'حفظ الطالب' }}</button>
+      @if (editingStudentId()) {
+        <button class="ghost" type="button" (click)="cancelEdit()">إلغاء</button>
+      }
+    </div>
+  </form>
+
+  <div class="panel table-panel">
+    <table>
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>الهاتف</th>
+          <th>ولي الأمر</th>
+          <th>المجموعة</th>
+          <th>الحالة</th>
+          <th>إجراء</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (student of students(); track student.id) {
+          <tr>
+            <td>{{ student.name }}</td>
+            <td>
+              @if (whatsappUrl(student.studentPhone); as url) {
+                <a class="phone-link" [href]="url" target="_blank" rel="noopener">{{ student.studentPhone }}</a>
+              } @else {
+                {{ student.studentPhone }}
+              }
+            </td>
+            <td>
+              @if (whatsappUrl(student.guardianPhone); as url) {
+                <a class="phone-link" [href]="url" target="_blank" rel="noopener">{{ student.guardianPhone }}</a>
+              } @else {
+                {{ student.guardianPhone }}
+              }
+            </td>
+            <td>{{ groupName(student.groupId) }}</td>
+            <td>
+              <span class="badge" [class.warn]="student.status === 'expelled'">
+                {{ student.status === 'expelled' ? 'مستبعد' : 'نشط' }}
+              </span>
+            </td>
+            <td class="row-actions">
+              <button class="ghost" type="button" (click)="editStudent(student)">تعديل</button>
+              <button class="ghost" type="button" (click)="toggleStatus(student)">
+                {{ student.status === 'expelled' ? 'تفعيل' : 'استبعاد' }}
+              </button>
+              @if (auth.isOwner()) {
+                <button class="danger" type="button" (click)="deleteStudent(student)">حذف نهائي</button>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6">لا توجد بيانات طلاب.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
