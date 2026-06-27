@@ -169,11 +169,21 @@ export class OwnerPage {
 
   downloadBackup() {
     this.api.downloadBackup().subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
+      next: async (blob) => {
+        const rawBackup = await blob.text();
+        let backupText = rawBackup;
+
+        try {
+          backupText = JSON.stringify(JSON.parse(rawBackup), null, 2);
+        } catch {
+          backupText = rawBackup;
+        }
+
+        const readableBackup = new Blob([backupText], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(readableBackup);
         const anchor = document.createElement('a');
         anchor.href = url;
-        anchor.download = `student-management-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        anchor.download = `student-management-backup-${new Date().toISOString().slice(0, 10)}.txt`;
         anchor.click();
         URL.revokeObjectURL(url);
       },
