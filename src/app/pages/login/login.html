@@ -10,7 +10,7 @@
       <form [formGroup]="form" (ngSubmit)="submit()">
         <div class="mode-switch" aria-label="نوع الحساب">
           <button type="button" [class.active]="accountType() === 'Owner'" (click)="setAccountType('Owner')">مالك</button>
-          <button type="button" [class.active]="accountType() === 'Admin'" (click)="setAccountType('Admin')">أدمن</button>
+          <button type="button" [class.active]="accountType() === 'Admin'" (click)="setAccountType('Admin')">إداري</button>
         </div>
 
         <label>
@@ -50,7 +50,7 @@
           </label>
           <p class="hint">حساب المالك يحتاج كلمة المرور وPIN في نفس عملية الدخول.</p>
         } @else {
-          <p class="hint">الأدمن يتم إنشاؤه من حساب المالك ويستخدم اسم المستخدم وكلمة المرور.</p>
+          <p class="hint">الإداري يتم إنشاؤه من حساب المالك ويستخدم اسم المستخدم وكلمة المرور.</p>
         }
 
         @if (error()) {

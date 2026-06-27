@@ -95,7 +95,7 @@ export class SettingsPage {
   }
 
   roleLabel() {
-    return this.auth.user()?.role === 'Owner' ? 'مالك النظام' : 'أدمن إداري';
+    return this.auth.user()?.role === 'Owner' ? 'مالك النظام' : 'إداري';
   }
 
   private showSaved(value: string) {

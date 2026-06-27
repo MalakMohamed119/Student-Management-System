@@ -121,23 +121,23 @@ export class OwnerPage {
 
   createAssistant() {
     if (this.assistantForm.invalid) {
-      this.error.set('اكتبي بيانات الأدمن كاملة.');
+      this.error.set('اكتبي بيانات الإداري كاملة.');
       return;
     }
 
     this.auth.registerAssistant({ ...this.assistantForm.getRawValue(), role: 'Admin' }).subscribe({
       next: () => {
         this.assistantForm.reset({ fullName: '', username: '', phone: '', password: '' });
-        this.showMessage('تم إنشاء حساب الأدمن.');
+        this.showMessage('تم إنشاء حساب الإداري.');
         this.refreshAssistants();
       },
-      error: () => this.error.set('تعذر إنشاء حساب الأدمن. تأكدي من الصلاحيات أو اسم المستخدم.')
+      error: () => this.error.set('تعذر إنشاء حساب الإداري. تأكدي من الصلاحيات أو اسم المستخدم.')
     });
   }
 
   resetPassword() {
     if (this.passwordForm.invalid || !this.passwordForm.controls.userId.value) {
-      this.error.set('اختاري الأدمن واكتبي كلمة مرور جديدة.');
+      this.error.set('اختاري الإداري واكتبي كلمة مرور جديدة.');
       return;
     }
 
@@ -145,7 +145,7 @@ export class OwnerPage {
     this.auth.resetPassword(value.userId, value.newPassword).subscribe({
       next: () => {
         this.passwordForm.reset({ userId: 0, newPassword: '' });
-        this.showMessage('تم تغيير كلمة مرور الأدمن.');
+        this.showMessage('تم تغيير كلمة مرور الإداري.');
       },
       error: () => this.error.set('تعذر تغيير كلمة المرور.')
     });
@@ -153,7 +153,7 @@ export class OwnerPage {
 
   resetPin() {
     if (this.pinForm.invalid || !this.pinForm.controls.userId.value) {
-      this.error.set('اختاري الأدمن واكتبي PIN من 4 أرقام.');
+      this.error.set('اختاري الإداري واكتبي PIN من 4 أرقام.');
       return;
     }
 
@@ -161,7 +161,7 @@ export class OwnerPage {
     this.auth.resetPin(value.userId, value.pin).subscribe({
       next: () => {
         this.pinForm.reset({ userId: 0, pin: '' });
-        this.showMessage('تم تغيير PIN الأدمن.');
+        this.showMessage('تم تغيير PIN الإداري.');
       },
       error: () => this.error.set('تعذر تغيير PIN.')
     });

@@ -48,7 +48,7 @@ export class LoginPage {
     if (!this.canSubmit()) {
       this.error.set(this.accountType() === 'Owner'
         ? 'حساب المالك يحتاج اسم المستخدم وكلمة المرور وكود PIN من 4 أرقام.'
-        : 'حساب الأدمن يحتاج اسم المستخدم وكلمة المرور.');
+        : 'حساب الإداري يحتاج اسم المستخدم وكلمة المرور.');
       return;
     }
 
@@ -64,7 +64,7 @@ export class LoginPage {
         if (user.role !== this.accountType()) {
           this.error.set(this.accountType() === 'Owner'
             ? 'هذا الحساب ليس حساب مالك.'
-            : 'هذا الحساب ليس حساب أدمن.');
+            : 'هذا الحساب ليس حساب إداري.');
           this.loading.set(false);
           return EMPTY;
         }
