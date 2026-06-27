@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://assemstudents.runasp.net'
+  apiUrl: 'https://assemstudents.runasp.net'
 };
