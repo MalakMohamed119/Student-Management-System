@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -110,14 +111,21 @@ export class StudentsPage {
     const editingId = this.editingStudentId();
     const previousGroupId = editingId ? this.students().find((student) => student.id === editingId)?.groupId ?? 0 : 0;
     const nextGroupId = value.groupId || 0;
-    const payload = { ...value, notes: this.cleanStudentNotes(value.notes), groupId: nextGroupId || undefined, imageUrl: undefined };
+    const payload = {
+      name: value.name.trim(),
+      studentPhone: value.studentPhone.trim(),
+      guardianPhone: value.guardianPhone.trim(),
+      gender: value.gender,
+      notes: this.cleanStudentNotes(value.notes)
+    };
     const request = editingId ? this.api.updateStudent(editingId, payload) : this.api.createStudent(payload);
 
     request.subscribe({
       next: (student) => this.syncStudentGroup(student.id || editingId, previousGroupId, nextGroupId),
-      error: () => {
-        this.error.set('تعذر حفظ بيانات الطالب.');
-        this.toast.error('تعذر حفظ بيانات الطالب.');
+      error: (error: HttpErrorResponse) => {
+        const message = this.apiErrorMessage(error, 'تعذر حفظ بيانات الطالب.');
+        this.error.set(message);
+        this.toast.error(message);
       }
     });
   }
@@ -501,6 +509,29 @@ export class StudentsPage {
 
   private attendanceRecordTime(record: StudentAttendanceRecord) {
     return new Date(`${record.sessionDate ?? ''} ${record.startTime ?? ''}`).getTime() || 0;
+  }
+
+  private apiErrorMessage(error: HttpErrorResponse, fallback: string) {
+    if (typeof error.error === 'string' && error.error.trim()) {
+      return error.error;
+    }
+
+    if (error.error?.message) {
+      return error.error.message as string;
+    }
+
+    if (error.error?.title) {
+      return error.error.title as string;
+    }
+
+    if (error.error?.errors) {
+      const messages = Object.values(error.error.errors).flat().filter(Boolean);
+      if (messages.length) {
+        return messages.join(' - ');
+      }
+    }
+
+    return fallback;
   }
 
   private whatsappNumber(phone: string | null | undefined) {
