@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { adminGuard, adminOrOwnerGuard, authGuard, ownerGuard, roleHomeGuard } from './core/guards/auth.guard';
+import { adminGuard, adminOrOwnerGuard, authCanMatchGuard, ownerGuard, roleHomeGuard } from './core/guards/auth.guard';
 import { AppShell } from './shared/shell/app-shell';
 
 export const routes: Routes = [
@@ -10,7 +10,7 @@ export const routes: Routes = [
   {
     path: '',
     component: AppShell,
-    canActivate: [authGuard],
+    canMatch: [authCanMatchGuard],
     children: [
       { path: '', pathMatch: 'full', canActivate: [roleHomeGuard], children: [] },
       {
@@ -18,6 +18,7 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         loadComponent: () => import('./pages/dashboard/dashboard').then((m) => m.DashboardPage)
       },
+
       {
         path: 'students/expelled',
         canActivate: [adminOrOwnerGuard],

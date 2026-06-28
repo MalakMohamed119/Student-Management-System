@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, CanMatchFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = () => {
@@ -7,6 +7,14 @@ export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
   return auth.isLoggedIn() || router.createUrlTree(['/login']);
 };
+
+// Prevent AppShell from even matching (and rendering) when user is not logged in
+export const authCanMatchGuard: CanMatchFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  return auth.isLoggedIn() || router.createUrlTree(['/login']);
+};
+
 
 export const ownerGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
