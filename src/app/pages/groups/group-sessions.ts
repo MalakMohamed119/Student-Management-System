@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, HostListener, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -34,11 +34,18 @@ export class GroupSessionsPage {
 
   readonly activeStudents = computed(() => this.students().filter((student) => student.status !== 'expelled'));
   readonly expelledStudents = computed(() => this.students().filter((student) => student.status === 'expelled'));
-  readonly totalPresent = computed(() => this.sessionSummaries().reduce((total, item) => total + item.present, 0));
-  readonly totalAbsent = computed(() => this.sessionSummaries().reduce((total, item) => total + item.absent, 0));
-  readonly totalRegistered = computed(() => this.sessionSummaries().reduce((total, item) => total + item.total, 0));
 
   constructor() {
+    this.load();
+  }
+
+  @HostListener('window:focus')
+  refreshOnFocus() {
+    this.load();
+  }
+
+  @HostListener('window:pageshow')
+  refreshOnPageShow() {
     this.load();
   }
 
