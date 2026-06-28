@@ -49,8 +49,12 @@
           <td>{{ row.studentName }}</td>
           <td>{{ row.isPresent === true ? 'حاضر' : row.isPresent === false ? 'غائب' : 'لم يسجل' }}</td>
           <td class="actions">
-            <button class="present" type="button" (click)="mark(row, true)">حاضر</button>
-            <button class="absent" type="button" (click)="mark(row, false)">غائب</button>
+            <button class="present" type="button" [disabled]="isSaving(row.studentId)" (click)="mark(row, true)">
+              {{ isSaving(row.studentId) ? 'جاري...' : 'حاضر' }}
+            </button>
+            <button class="absent" type="button" [disabled]="isSaving(row.studentId)" (click)="mark(row, false)">
+              {{ isSaving(row.studentId) ? 'جاري...' : 'غائب' }}
+            </button>
           </td>
         </tr>
       } @empty {
