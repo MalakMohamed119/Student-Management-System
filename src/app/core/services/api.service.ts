@@ -108,7 +108,14 @@ export class ApiService {
   }
 
   markAttendance(sessionId: number, studentId: number, isPresent: boolean) {
-    return this.http.post(`${this.api}/Sessions/attendance`, { sessionId, studentId, isPresent });
+    return this.http.post(`${this.api}/Sessions/attendance`, {
+      sessionId,
+      studentId,
+      isPresent,
+      SessionId: sessionId,
+      StudentId: studentId,
+      IsPresent: isPresent
+    });
   }
 
   getSettings() {

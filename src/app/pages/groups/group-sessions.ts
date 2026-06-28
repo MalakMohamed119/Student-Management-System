@@ -14,6 +14,14 @@ interface SessionSummary {
   total: number;
 }
 
+type AttendanceApiRow = AttendanceRow & {
+  IsPresent?: boolean | string | number | null;
+  present?: boolean | string | number | null;
+  Present?: boolean | string | number | null;
+  attendanceStatus?: string | null;
+  AttendanceStatus?: string | null;
+};
+
 @Component({
   selector: 'app-group-sessions',
   imports: [RouterLink, AppDatePipe, AppTime12Pipe],
@@ -95,13 +103,38 @@ export class GroupSessionsPage {
   private toSessionSummary(session: Session, rows: AttendanceRow[]): SessionSummary {
     return {
       session,
-      present: rows.filter((row) => row.isPresent === true).length,
-      absent: rows.filter((row) => row.isPresent === false).length,
+      present: rows.filter((row) => this.toAttendanceValue(row as AttendanceApiRow) === true).length,
+      absent: rows.filter((row) => this.toAttendanceValue(row as AttendanceApiRow) === false).length,
       total: Math.max(rows.length, this.students().length)
     };
   }
 
   private sessionTime(session: Session) {
     return new Date(`${session.sessionDate} ${session.startTime ?? ''}`).getTime() || 0;
+  }
+
+  private toAttendanceValue(row: AttendanceApiRow): boolean | null {
+    const source = row as unknown as Record<string, unknown>;
+    const value = source['isPresent'] ?? source['IsPresent'] ?? source['present'] ?? source['Present'] ?? source['attendanceStatus'] ?? source['AttendanceStatus'];
+
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    if (typeof value === 'number') {
+      return value === 1 ? true : value === 0 ? false : null;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (['true', '1', 'present', 'حاضر'].includes(normalized)) {
+        return true;
+      }
+      if (['false', '0', 'absent', 'غائب'].includes(normalized)) {
+        return false;
+      }
+    }
+
+    return null;
   }
 }

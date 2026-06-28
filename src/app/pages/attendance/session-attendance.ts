@@ -6,6 +6,16 @@ import { AttendanceRow, Session, Student } from '../../core/models/api.models';
 import { catchError, forkJoin, of } from 'rxjs';
 import { AppDatePipe, AppTime12Pipe } from '../../shared/date-time-format.pipe';
 
+type AttendanceApiRow = AttendanceRow & {
+  StudentId?: number;
+  StudentName?: string;
+  IsPresent?: boolean | string | number | null;
+  present?: boolean | string | number | null;
+  Present?: boolean | string | number | null;
+  attendanceStatus?: string | null;
+  AttendanceStatus?: string | null;
+};
+
 @Component({
   selector: 'app-session-attendance',
   imports: [RouterLink, AppDatePipe, AppTime12Pipe],
@@ -21,6 +31,7 @@ export class SessionAttendancePage {
   readonly groupId = Number(this.route.snapshot.queryParamMap.get('groupId') ?? 0);
   readonly sessions = signal<Session[]>([]);
   readonly attendance = signal<AttendanceRow[]>([]);
+  readonly localAttendance = signal<Record<number, boolean>>({});
   readonly savingStudentIds = signal<number[]>([]);
   readonly loading = signal(true);
   readonly message = signal('جاري تحميل كشف الحضور...');
@@ -64,12 +75,14 @@ export class SessionAttendancePage {
 
     this.api.markAttendance(this.sessionId, row.studentId, isPresent).subscribe({
       next: () => {
+        this.setLocalAttendance(row.studentId, isPresent);
         this.toast.success(isPresent ? 'تم تسجيل الطالب حاضر.' : 'تم تسجيل الطالب غائب.');
         this.openSheet(false, row.studentId);
       },
       error: () => {
         this.error.set('تعذر تسجيل الحضور. جرب مرة أخرى.');
         this.toast.error('تعذر تسجيل الحضور.');
+        console.error('Attendance save failed', { sessionId: this.sessionId, studentId: row.studentId, isPresent });
         this.finishSaving(row.studentId);
       }
     });
@@ -103,7 +116,7 @@ export class SessionAttendancePage {
       students: this.api.getGroupStudents(groupId).pipe(catchError(() => of([] as Student[])))
     }).subscribe({
       next: ({ rows, students }) => {
-        this.attendance.set(this.mergeAttendanceRows(students, rows));
+        this.attendance.set(this.applyLocalAttendance(this.mergeAttendanceRows(students, rows)));
         this.message.set(students.length || rows.length ? '' : 'المجموعة دي مفيهاش طلاب لسه.');
         this.loading.set(false);
         this.finishSaving(savedStudentId);
@@ -121,7 +134,7 @@ export class SessionAttendancePage {
   private loadAttendanceOnly(savedStudentId?: number) {
     this.api.getSessionAttendance(this.sessionId).subscribe({
       next: (rows) => {
-        this.attendance.set(rows);
+        this.attendance.set(this.applyLocalAttendance(rows.map((row) => this.normalizeAttendanceRow(row as AttendanceApiRow))));
         this.message.set(rows.length ? '' : 'الحصة غير موجودة.');
         this.loading.set(false);
         this.finishSaving(savedStudentId);
@@ -137,15 +150,32 @@ export class SessionAttendancePage {
   }
 
   private mergeAttendanceRows(students: Student[], rows: AttendanceRow[]) {
-    const rowsByStudent = new Map(rows.map((row) => [row.studentId, row]));
+    const normalizedRows = rows.map((row) => this.normalizeAttendanceRow(row as AttendanceApiRow));
+    const rowsByStudent = new Map(normalizedRows.map((row) => [row.studentId, row]));
     const studentRows = students.map((student) => ({
       ...this.toAttendanceRow(student),
       ...(rowsByStudent.get(student.id) ?? {})
     }));
     const existingIds = new Set(students.map((student) => student.id));
-    const extraRows = rows.filter((row) => !existingIds.has(row.studentId));
+    const extraRows = normalizedRows.filter((row) => !existingIds.has(row.studentId));
 
     return [...studentRows, ...extraRows];
+  }
+
+  private setLocalAttendance(studentId: number, isPresent: boolean) {
+    this.localAttendance.update((current) => ({ ...current, [studentId]: isPresent }));
+    this.attendance.update((rows) =>
+      rows.map((row) => (row.studentId === studentId ? { ...row, isPresent } : row))
+    );
+  }
+
+  private applyLocalAttendance(rows: AttendanceRow[]) {
+    const local = this.localAttendance();
+    return rows.map((row) =>
+      Object.prototype.hasOwnProperty.call(local, row.studentId)
+        ? { ...row, isPresent: local[row.studentId] }
+        : row
+    );
   }
 
   private finishSaving(studentId: number | undefined) {
@@ -163,5 +193,38 @@ export class SessionAttendancePage {
       isPresent: null,
       status: student.status
     };
+  }
+
+  private normalizeAttendanceRow(row: AttendanceApiRow): AttendanceRow {
+    return {
+      studentId: Number(row.studentId ?? row.StudentId ?? 0),
+      studentName: row.studentName ?? row.StudentName ?? '',
+      isPresent: this.toAttendanceValue(
+        row.isPresent ?? row.IsPresent ?? row.present ?? row.Present ?? row.attendanceStatus ?? row.AttendanceStatus
+      ),
+      status: row.status
+    };
+  }
+
+  private toAttendanceValue(value: boolean | string | number | null | undefined): boolean | null {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    if (typeof value === 'number') {
+      return value === 1 ? true : value === 0 ? false : null;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (['true', '1', 'present', 'حاضر'].includes(normalized)) {
+        return true;
+      }
+      if (['false', '0', 'absent', 'غائب'].includes(normalized)) {
+        return false;
+      }
+    }
+
+    return null;
   }
 }

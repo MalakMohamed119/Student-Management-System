@@ -44,11 +44,11 @@ export class StudentsPage {
   readonly detailsLoading = signal(false);
   readonly error = signal('');
 
-  readonly presentDays = computed(() => this.selectedStudentAttendance().filter((item) => item.isPresent).length);
-  readonly absentDays = computed(() => this.selectedStudentAttendance().filter((item) => !item.isPresent).length);
+  readonly presentDays = computed(() => this.selectedStudentAttendance().filter((item) => this.toAttendanceValue(item) === true).length);
+  readonly absentDays = computed(() => this.selectedStudentAttendance().filter((item) => this.toAttendanceValue(item) === false).length);
   readonly absentAttendanceRecords = computed(() =>
     this.selectedStudentAttendance()
-      .filter((item) => !item.isPresent)
+      .filter((item) => this.toAttendanceValue(item) === false)
       .sort((a, b) => this.attendanceRecordTime(b) - this.attendanceRecordTime(a))
   );
   readonly selectedGroupNames = computed(() => this.selectedStudentGroups().map((group) => group.name).join('، '));
@@ -337,7 +337,7 @@ export class StudentsPage {
       )
     ).subscribe((recordsList) => {
       const counts = expelled.reduce<Record<number, number>>((result, student, index) => {
-        result[student.id] = recordsList[index].filter((record) => !record.isPresent).length;
+        result[student.id] = recordsList[index].filter((record) => this.toAttendanceValue(record) === false).length;
         return result;
       }, {});
       this.expelledAbsenceCounts.set(counts);
@@ -518,6 +518,31 @@ export class StudentsPage {
 
   private attendanceRecordTime(record: StudentAttendanceRecord) {
     return new Date(`${record.sessionDate ?? ''} ${record.startTime ?? ''}`).getTime() || 0;
+  }
+
+  private toAttendanceValue(record: StudentAttendanceRecord): boolean | null {
+    const source = record as unknown as Record<string, unknown>;
+    const value = source['isPresent'] ?? source['IsPresent'] ?? source['present'] ?? source['Present'] ?? source['attendanceStatus'] ?? source['AttendanceStatus'];
+
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    if (typeof value === 'number') {
+      return value === 1 ? true : value === 0 ? false : null;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (['true', '1', 'present', 'حاضر'].includes(normalized)) {
+        return true;
+      }
+      if (['false', '0', 'absent', 'غائب'].includes(normalized)) {
+        return false;
+      }
+    }
+
+    return null;
   }
 
   private apiErrorMessage(error: HttpErrorResponse, fallback: string) {
