@@ -5,6 +5,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import { AuditLog, Gender, Student, StudentAttendanceRecord, StudentGroup } from '../../core/models/api.models';
 import { AppDatePipe, AppTime12Pipe } from '../../shared/date-time-format.pipe';
 
@@ -20,6 +21,7 @@ export class StudentsPage {
   private readonly api = inject(ApiService);
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
+  private readonly toast = inject(ToastService);
   readonly auth = inject(AuthService);
 
   readonly students = signal<Student[]>([]);
@@ -113,7 +115,10 @@ export class StudentsPage {
 
     request.subscribe({
       next: (student) => this.syncStudentGroup(student.id || editingId, previousGroupId, nextGroupId),
-      error: () => this.error.set('تعذر حفظ بيانات الطالب.')
+      error: () => {
+        this.error.set('تعذر حفظ بيانات الطالب.');
+        this.toast.error('تعذر حفظ بيانات الطالب.');
+      }
     });
   }
 
@@ -175,7 +180,13 @@ export class StudentsPage {
 
   toggleStatus(student: Student) {
     if (student.status === 'expelled') {
-      this.api.activateStudent(student.id).subscribe(() => this.loadStudents());
+      this.api.activateStudent(student.id).subscribe({
+        next: () => {
+          this.toast.success('تم تفعيل الطالب.');
+          this.loadStudents();
+        },
+        error: () => this.toast.error('تعذر تفعيل الطالب.')
+      });
       return;
     }
 
@@ -194,9 +205,13 @@ export class StudentsPage {
     this.api.expelStudent(student.id, reason).subscribe({
       next: () => {
         this.saveExpulsionReason(student.id, reason);
+        this.toast.success('تم استبعاد الطالب.');
         this.removeExpelledStudentFromGroup(student);
       },
-      error: () => this.error.set('تعذر استبعاد الطالب.')
+      error: () => {
+        this.error.set('تعذر استبعاد الطالب.');
+        this.toast.error('تعذر استبعاد الطالب.');
+      }
     });
   }
 
@@ -250,17 +265,27 @@ export class StudentsPage {
       return;
     }
 
-    this.api.deleteStudent(student.id).subscribe(() => this.loadStudents());
+    this.api.deleteStudent(student.id).subscribe({
+      next: () => {
+        this.toast.success('تم حذف الطالب.');
+        this.loadStudents();
+      },
+      error: () => this.toast.error('تعذر حذف الطالب.')
+    });
   }
 
   export() {
-    this.api.exportStudents().subscribe((blob) => {
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = 'students.xlsx';
-      anchor.click();
-      URL.revokeObjectURL(url);
+    this.api.exportStudents().subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = 'students.xlsx';
+        anchor.click();
+        URL.revokeObjectURL(url);
+        this.toast.success('تم تصدير الطلاب.');
+      },
+      error: () => this.toast.error('تعذر تصدير الطلاب.')
     });
   }
 
@@ -325,6 +350,7 @@ export class StudentsPage {
   }
 
   private finishSave() {
+    this.toast.success(this.editingStudentId() ? 'تم تعديل بيانات الطالب.' : 'تم حفظ الطالب.');
     this.resetForm();
     this.loadStudents();
   }
@@ -333,6 +359,7 @@ export class StudentsPage {
     const finish = () => {
       this.closeTransfer();
       this.error.set('');
+      this.toast.success('تم نقل الطالب.');
       this.loadStudents();
     };
 
@@ -345,12 +372,24 @@ export class StudentsPage {
     }
 
     if (previousGroupId) {
-      this.api.unenrollStudent(studentId, previousGroupId).subscribe({ next: finish, error: () => this.error.set('تعذر نقل الطالب.') });
+      this.api.unenrollStudent(studentId, previousGroupId).subscribe({
+        next: finish,
+        error: () => {
+          this.error.set('تعذر نقل الطالب.');
+          this.toast.error('تعذر نقل الطالب.');
+        }
+      });
       return;
     }
 
     if (nextGroupId) {
-      this.api.enrollStudent(studentId, nextGroupId).subscribe({ next: finish, error: () => this.error.set('تعذر نقل الطالب.') });
+      this.api.enrollStudent(studentId, nextGroupId).subscribe({
+        next: finish,
+        error: () => {
+          this.error.set('تعذر نقل الطالب.');
+          this.toast.error('تعذر نقل الطالب.');
+        }
+      });
       return;
     }
 

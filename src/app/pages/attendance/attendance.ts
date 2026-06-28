@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Session, StudentGroup } from '../../core/models/api.models';
 import { AppDatePipe, AppTime12Pipe } from '../../shared/date-time-format.pipe';
 import { TimePicker } from '../../shared/time-picker/time-picker';
@@ -16,6 +17,7 @@ export class AttendancePage {
   private readonly api = inject(ApiService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
   readonly groups = signal<StudentGroup[]>([]);
   readonly sessions = signal<Session[]>([]);
@@ -51,9 +53,13 @@ export class AttendancePage {
       return;
     }
 
-    this.api.createSession(value).subscribe(() => {
-      this.form.reset({ groupId: 0, sessionDate: this.today(), startTime: '17:00' });
-      this.load();
+    this.api.createSession(value).subscribe({
+      next: () => {
+        this.toast.success('تم إنشاء الحصة.');
+        this.form.reset({ groupId: 0, sessionDate: this.today(), startTime: '17:00' });
+        this.load();
+      },
+      error: () => this.toast.error('تعذر إنشاء الحصة.')
     });
   }
 

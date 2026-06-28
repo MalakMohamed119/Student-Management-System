@@ -1,1 +1,9 @@
 <router-outlet />
+
+<div class="toast-stack" dir="rtl" aria-live="polite" aria-atomic="true">
+  @for (message of toast.messages(); track message.id) {
+    <button class="toast" [class.success]="message.type === 'success'" [class.error]="message.type === 'error'" type="button" (click)="toast.dismiss(message.id)">
+      {{ message.text }}
+    </button>
+  }
+</div>

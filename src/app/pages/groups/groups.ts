@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Student, StudentGroup } from '../../core/models/api.models';
 import { AppTime12Pipe } from '../../shared/date-time-format.pipe';
 import { TimePicker } from '../../shared/time-picker/time-picker';
@@ -18,6 +19,7 @@ export class GroupsPage {
   private readonly api = inject(ApiService);
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
   readonly auth = inject(AuthService);
   readonly groups = signal<StudentGroup[]>([]);
   readonly students = signal<Student[]>([]);
@@ -62,9 +64,13 @@ export class GroupsPage {
     if (this.form.invalid || this.form.controls.weekdays.value.length === 0) {
       return;
     }
-    this.api.createGroup(this.form.getRawValue()).subscribe(() => {
-      this.form.reset({ name: '', description: '', weekdays: [1], startTime: '17:00', endTime: '18:00' });
-      this.load();
+    this.api.createGroup(this.form.getRawValue()).subscribe({
+      next: () => {
+        this.toast.success('تم إنشاء المجموعة.');
+        this.form.reset({ name: '', description: '', weekdays: [1], startTime: '17:00', endTime: '18:00' });
+        this.load();
+      },
+      error: () => this.toast.error('تعذر إنشاء المجموعة.')
     });
   }
 
@@ -77,7 +83,13 @@ export class GroupsPage {
   }
 
   generate(groupId: number) {
-    this.api.generateSessions(groupId, 30).subscribe(() => this.load());
+    this.api.generateSessions(groupId, 30).subscribe({
+      next: () => {
+        this.toast.success('تم توليد حصص المجموعة.');
+        this.load();
+      },
+      error: () => this.toast.error('تعذر توليد حصص المجموعة.')
+    });
   }
 
   deleteGroup(group: StudentGroup) {
@@ -85,6 +97,12 @@ export class GroupsPage {
       return;
     }
 
-    this.api.deleteGroup(group.id).subscribe(() => this.load());
+    this.api.deleteGroup(group.id).subscribe({
+      next: () => {
+        this.toast.success('تم حذف المجموعة.');
+        this.load();
+      },
+      error: () => this.toast.error('تعذر حذف المجموعة.')
+    });
   }
 }

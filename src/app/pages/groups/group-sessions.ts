@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
+import { ToastService } from '../../core/services/toast.service';
 import { AttendanceRow, Session, Student, StudentGroup } from '../../core/models/api.models';
 import { AppDatePipe, AppTime12Pipe } from '../../shared/date-time-format.pipe';
 
@@ -22,6 +23,7 @@ interface SessionSummary {
 export class GroupSessionsPage {
   private readonly api = inject(ApiService);
   private readonly route = inject(ActivatedRoute);
+  private readonly toast = inject(ToastService);
 
   readonly groupId = Number(this.route.snapshot.paramMap.get('id'));
   readonly group = signal<StudentGroup | null>(null);
@@ -77,6 +79,7 @@ export class GroupSessionsPage {
       },
       error: () => {
         this.error.set('تعذر تحميل إحصائيات حصص المجموعة.');
+        this.toast.error('تعذر تحميل إحصائيات حصص المجموعة.');
         this.loading.set(false);
       }
     });
@@ -87,7 +90,7 @@ export class GroupSessionsPage {
       session,
       present: rows.filter((row) => row.isPresent === true).length,
       absent: rows.filter((row) => row.isPresent === false).length,
-      total: rows.length || this.students().length
+      total: Math.max(rows.length, this.students().length)
     };
   }
 
