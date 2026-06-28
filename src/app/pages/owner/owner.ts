@@ -87,7 +87,7 @@ export class OwnerPage {
         this.sessions.set(sessions);
         this.settingsForm.patchValue(settings);
       },
-      error: () => this.error.set('تعذر تحميل بيانات المالك. تأكدي من تسجيل الدخول بحساب Owner.'),
+      error: () => this.error.set('تعذر تحميل بيانات المالك. تأكد من تسجيل الدخول بحساب المالك.'),
       complete: () => this.loading.set(false)
     });
   }
@@ -116,7 +116,7 @@ export class OwnerPage {
 
   createAssistant() {
     if (this.assistantForm.invalid) {
-      this.error.set('اكتبي بيانات الإداري كاملة.');
+      this.error.set('اكتب بيانات الإداري كاملة.');
       return;
     }
 
@@ -132,7 +132,7 @@ export class OwnerPage {
 
   resetPin() {
     if (this.pinForm.invalid || !this.pinForm.controls.userId.value) {
-      this.error.set('اختاري الإداري واكتبي PIN من 4 أرقام.');
+      this.error.set('اختاري الإداري واكتب PIN من 4 أرقام.');
       return;
     }
 

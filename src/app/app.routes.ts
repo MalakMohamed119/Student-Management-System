@@ -1,8 +1,9 @@
 import { Routes } from '@angular/router';
-import { adminGuard, adminOrOwnerGuard, authCanMatchGuard, ownerGuard, roleHomeGuard } from './core/guards/auth.guard';
+import { adminGuard, adminOrOwnerGuard, authCanMatchGuard, ownerGuard } from './core/guards/auth.guard';
 import { AppShell } from './shared/shell/app-shell';
 
 export const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'login' },
   {
     path: 'login',
     loadComponent: () => import('./pages/login/login').then((m) => m.LoginPage)
@@ -12,7 +13,6 @@ export const routes: Routes = [
     component: AppShell,
     canMatch: [authCanMatchGuard],
     children: [
-      { path: '', pathMatch: 'full', canActivate: [roleHomeGuard], children: [] },
       {
         path: 'dashboard',
         canActivate: [adminGuard],

@@ -164,6 +164,32 @@ form {
   font-size: 13px;
 }
 
+.absence-dates {
+  display: grid;
+  gap: 8px;
+}
+
+.absence-dates p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.absence-dates p + p {
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.absence-dates p b {
+  margin: 0;
+  color: #0f172a;
+}
+
+.absence-dates span {
+  color: #64748b;
+}
+
 .muted {
   color: #64748b;
 }

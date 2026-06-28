@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AttendanceRow, Session, Student, StudentAttendanceRecord } from '../../core/models/api.models';
@@ -22,6 +22,9 @@ export class SessionAttendancePage {
   readonly loading = signal(true);
   readonly message = signal('جاري تحميل كشف الحضور...');
   readonly error = signal('');
+  readonly presentCount = computed(() => this.attendance().filter((row) => row.isPresent === true).length);
+  readonly absentCount = computed(() => this.attendance().filter((row) => row.isPresent === false).length);
+  readonly totalCount = computed(() => this.attendance().length);
 
   constructor() {
     this.load();
@@ -59,7 +62,7 @@ export class SessionAttendancePage {
           this.checkAutoExpelAfterAbsence(row.studentId);
         }
       },
-      error: () => this.error.set('تعذر تسجيل الحضور. جربي مرة أخرى.')
+      error: () => this.error.set('تعذر تسجيل الحضور. جرب مرة أخرى.')
     });
   }
 

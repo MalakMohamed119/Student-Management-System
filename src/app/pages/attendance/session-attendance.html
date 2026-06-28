@@ -19,6 +19,14 @@
     }
   </div>
 
+  @if (attendance().length) {
+    <div class="session-stats" aria-label="إحصائيات الحصة">
+      <span><b>حاضر</b>{{ presentCount() }}</span>
+      <span><b>غائب</b>{{ absentCount() }}</span>
+      <span><b>الكلي</b>{{ totalCount() }}</span>
+    </div>
+  }
+
   @if (error()) {
     <p class="sheet-error">{{ error() }}</p>
   }

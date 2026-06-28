@@ -6,12 +6,13 @@ import { catchError } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AuditLog, Gender, Student, StudentAttendanceRecord, StudentGroup } from '../../core/models/api.models';
+import { AppDatePipe, AppTime12Pipe } from '../../shared/date-time-format.pipe';
 
 const EXPULSION_REASONS_KEY = 'student-management.expulsion-reasons';
 
 @Component({
   selector: 'app-students',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, AppDatePipe, AppTime12Pipe],
   templateUrl: './students.html',
   styleUrl: './students.scss'
 })
@@ -42,6 +43,11 @@ export class StudentsPage {
 
   readonly presentDays = computed(() => this.selectedStudentAttendance().filter((item) => item.isPresent).length);
   readonly absentDays = computed(() => this.selectedStudentAttendance().filter((item) => !item.isPresent).length);
+  readonly absentAttendanceRecords = computed(() =>
+    this.selectedStudentAttendance()
+      .filter((item) => !item.isPresent)
+      .sort((a, b) => this.attendanceRecordTime(b) - this.attendanceRecordTime(a))
+  );
   readonly selectedGroupNames = computed(() => this.selectedStudentGroups().map((group) => group.name).join('، '));
   readonly expelReasons = computed(() => {
     const student = this.selectedStudent();
@@ -94,7 +100,7 @@ export class StudentsPage {
 
   save() {
     if (this.form.invalid) {
-      this.error.set('اكتبي بيانات الطالب كاملة.');
+      this.error.set('اكتب بيانات الطالب كاملة.');
       return;
     }
 
@@ -143,7 +149,7 @@ export class StudentsPage {
     }
 
     if (previousGroupId === nextGroupId) {
-      this.error.set('اختاري مجموعة مختلفة لنقل الطالب.');
+      this.error.set('اختار مجموعة مختلفة لنقل الطالب.');
       return;
     }
 
@@ -181,7 +187,7 @@ export class StudentsPage {
     const student = this.expelTarget();
     const reason = this.expelReason().trim();
     if (!student || !reason) {
-      this.error.set('اكتبي سبب الاستبعاد الأول.');
+      this.error.set('اكتب سبب الاستبعاد الأول.');
       return;
     }
 
@@ -452,6 +458,10 @@ export class StudentsPage {
       .replace(/\s*\[(?:[^\]]*(?:طرد|استبعاد|expel)[^\]]*(?:السبب|reason)\s*[:：-]\s*)[^\]]+\]\s*/gi, ' ')
       .replace(/\s{2,}/g, ' ')
       .trim();
+  }
+
+  private attendanceRecordTime(record: StudentAttendanceRecord) {
+    return new Date(`${record.sessionDate ?? ''} ${record.startTime ?? ''}`).getTime() || 0;
   }
 
   private whatsappNumber(phone: string | null | undefined) {

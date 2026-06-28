@@ -100,6 +100,30 @@ form,
   color: #155e75;
 }
 
+.session-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.session-stats span {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.session-stats b {
+  color: #64748b;
+  font-size: 13px;
+}
+
 .empty-state,
 .sheet-error {
   margin: 0 0 12px;
@@ -140,6 +164,10 @@ form,
 
 @media (max-width: 1050px) {
   .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .session-stats {
     grid-template-columns: 1fr;
   }
 }

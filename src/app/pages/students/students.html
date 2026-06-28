@@ -215,6 +215,23 @@
         <p>{{ selectedGroupNames() || groupName(student.groupId) }}</p>
       </div>
 
+      <div class="detail-section absence-dates">
+        <h3>تواريخ الغياب</h3>
+        @for (record of absentAttendanceRecords(); track record.id ?? record.sessionId ?? record.sessionDate) {
+          <p>
+            <b>{{ record.sessionDate | appDate }}</b>
+            @if (record.startTime) {
+              <span>{{ record.startTime | appTime12 }}</span>
+            }
+            @if (record.groupName) {
+              <span>{{ record.groupName }}</span>
+            }
+          </p>
+        } @empty {
+          <p>لا توجد تواريخ غياب مسجلة.</p>
+        }
+      </div>
+
       <div class="detail-section">
         <h3>الملاحظات</h3>
         <p>{{ studentNotes(student) || 'لا توجد ملاحظات.' }}</p>
