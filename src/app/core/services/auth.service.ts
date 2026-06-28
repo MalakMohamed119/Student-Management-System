@@ -39,19 +39,13 @@ export class AuthService {
     return this.http.post(`${this.baseUrl}/setup-pin`, { pin });
   }
 
-  updateProfile(payload: { fullName: string; phone: string; imageUrl?: string }) {
+  updateProfile(payload: { fullName: string; phone: string }) {
     return this.http.put<AuthUser>(`${this.baseUrl}/profile`, payload).pipe(
       tap((user) => {
         const current = this.userState();
         this.persist({ ...(current ?? user), ...user });
       })
     );
-  }
-
-  uploadProfilePhoto(file: File) {
-    const data = new FormData();
-    data.append('file', file);
-    return this.http.post<{ url: string }>(`${this.baseUrl}/upload-photo`, data);
   }
 
   registerAssistant(payload: { username: string; password: string; role: 'Admin'; fullName: string; phone: string }) {

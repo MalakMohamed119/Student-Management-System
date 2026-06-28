@@ -39,6 +39,23 @@ article {
   padding: 20px;
 }
 
+.metric-action {
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+.metric-action:hover {
+  border-color: #0f766e;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.12);
+}
+
+.metric-action:active {
+  transform: translateY(1px) scale(0.99);
+}
+
 article span,
 .row span,
 .empty {
@@ -87,6 +104,25 @@ article strong {
 .row strong,
 .row span {
   display: block;
+}
+
+.expelled-panel {
+  margin-bottom: 22px;
+}
+
+.expelled-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(240px, 1.3fr);
+  gap: 14px;
+}
+
+.reason-list {
+  display: grid;
+  gap: 4px;
+}
+
+.reason-list b {
+  color: #991b1b;
 }
 
 @media (max-width: 1000px) {

@@ -1,7 +1,7 @@
 .time-picker {
   display: grid;
-  grid-template-columns: minmax(82px, 1fr) minmax(82px, 1fr) minmax(96px, 1fr);
-  gap: 10px;
+  grid-template-columns: minmax(96px, 1fr) minmax(96px, 1fr) minmax(112px, 1fr);
+  gap: 12px;
 }
 
 .time-field {
@@ -17,23 +17,29 @@
 
 .time-field select {
   min-width: 0;
+  min-height: 48px;
+  cursor: pointer;
 }
 
 .period-toggle {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: 44px;
+  min-height: 48px;
   border: 1px solid #dbe3ef;
   border-radius: 8px;
   overflow: hidden;
 }
 
 .period-toggle button {
-  min-height: 42px;
+  min-height: 46px;
   border-radius: 0;
   background: #fff;
   color: #0f172a;
   padding: 0;
+}
+
+.period-toggle button:hover:not(:disabled) {
+  background: #f0fdfa;
 }
 
 .period-toggle button.active {

@@ -71,6 +71,21 @@ button {
   color: #fff;
   font-weight: 900;
   cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 120ms ease,
+    box-shadow 150ms ease;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(0.94);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px) scale(0.99);
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
 }
 
 button:disabled {

@@ -22,7 +22,7 @@
     <span>&#1581;&#1589;&#1589; &#1602;&#1575;&#1583;&#1605;&#1577;</span>
     <strong>{{ sessions().length }}</strong>
   </article>
-  <article>
+  <article class="metric-action" routerLink="/students/expelled" tabindex="0" role="button">
     <span>&#1591;&#1604;&#1575;&#1576; &#1605;&#1587;&#1578;&#1576;&#1593;&#1583;&#1610;&#1606;</span>
     <strong>{{ expelledCount() }}</strong>
   </article>
@@ -53,7 +53,7 @@
       <div class="row">
         <div>
           <strong>{{ group.name }}</strong>
-          <span>{{ group.studentCount }} &#1591;&#1575;&#1604;&#1576;</span>
+          <span>{{ activeStudentCount(group.id) }} &#1591;&#1575;&#1604;&#1576;</span>
         </div>
       </div>
     } @empty {

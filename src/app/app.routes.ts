@@ -19,6 +19,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/dashboard/dashboard').then((m) => m.DashboardPage)
       },
       {
+        path: 'students/expelled',
+        canActivate: [adminOrOwnerGuard],
+        loadComponent: () => import('./pages/students/students').then((m) => m.StudentsPage)
+      },
+      {
         path: 'students',
         canActivate: [adminOrOwnerGuard],
         loadComponent: () => import('./pages/students/students').then((m) => m.StudentsPage)
@@ -32,6 +37,11 @@ export const routes: Routes = [
         path: 'attendance',
         canActivate: [adminGuard],
         loadComponent: () => import('./pages/attendance/attendance').then((m) => m.AttendancePage)
+      },
+      {
+        path: 'attendance/:id',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./pages/attendance/session-attendance').then((m) => m.SessionAttendancePage)
       },
       {
         path: 'settings',

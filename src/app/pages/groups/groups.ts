@@ -1,8 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { StudentGroup } from '../../core/models/api.models';
+import { Student, StudentGroup } from '../../core/models/api.models';
 import { AppTime12Pipe } from '../../shared/date-time-format.pipe';
 import { TimePicker } from '../../shared/time-picker/time-picker';
 
@@ -17,6 +18,7 @@ export class GroupsPage {
   private readonly fb = inject(FormBuilder);
   readonly auth = inject(AuthService);
   readonly groups = signal<StudentGroup[]>([]);
+  readonly students = signal<Student[]>([]);
   readonly weekdays = [
     { value: 1, label: 'الإثنين' },
     { value: 2, label: 'الثلاثاء' },
@@ -32,7 +34,7 @@ export class GroupsPage {
     description: [''],
     weekdays: [[1]],
     startTime: ['17:00', Validators.required],
-    endTime: ['18:30', Validators.required]
+    endTime: ['18:00', Validators.required]
   });
 
   constructor() {
@@ -40,7 +42,13 @@ export class GroupsPage {
   }
 
   load() {
-    this.api.getGroups().subscribe((groups) => this.groups.set(groups));
+    forkJoin({
+      groups: this.api.getGroups(),
+      students: this.api.getStudents()
+    }).subscribe(({ groups, students }) => {
+      this.groups.set(groups);
+      this.students.set(students);
+    });
   }
 
   setDay(day: number, checked: boolean) {
@@ -53,13 +61,17 @@ export class GroupsPage {
       return;
     }
     this.api.createGroup(this.form.getRawValue()).subscribe(() => {
-      this.form.reset({ name: '', description: '', weekdays: [1], startTime: '17:00', endTime: '18:30' });
+      this.form.reset({ name: '', description: '', weekdays: [1], startTime: '17:00', endTime: '18:00' });
       this.load();
     });
   }
 
+  activeStudentCount(groupId: number) {
+    return this.students().filter((student) => student.groupId === groupId && student.status !== 'expelled').length;
+  }
+
   generate(groupId: number) {
-    this.api.generateSessions(groupId, 30).subscribe();
+    this.api.generateSessions(groupId, 30).subscribe(() => this.load());
   }
 
   deleteGroup(group: StudentGroup) {

@@ -58,6 +58,17 @@ export interface AttendanceRow {
   status?: StudentStatus;
 }
 
+export interface StudentAttendanceRecord {
+  id?: number;
+  sessionId?: number;
+  studentId?: number;
+  studentName?: string;
+  groupName?: string;
+  sessionDate?: string;
+  startTime?: string;
+  isPresent: boolean;
+}
+
 export interface SystemSettings {
   absenceThreshold: number;
 }

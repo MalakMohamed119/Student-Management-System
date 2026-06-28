@@ -39,12 +39,7 @@ export class OwnerPage {
     fullName: ['', Validators.required],
     username: ['', Validators.required],
     phone: ['', Validators.required],
-    password: ['', Validators.required]
-  });
-
-  readonly passwordForm = this.fb.nonNullable.group({
-    userId: [0, Validators.required],
-    newPassword: ['', Validators.required]
+    password: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(4)]]
   });
 
   readonly pinForm = this.fb.nonNullable.group({
@@ -132,22 +127,6 @@ export class OwnerPage {
         this.refreshAssistants();
       },
       error: () => this.error.set('تعذر إنشاء حساب الإداري. تأكدي من الصلاحيات أو اسم المستخدم.')
-    });
-  }
-
-  resetPassword() {
-    if (this.passwordForm.invalid || !this.passwordForm.controls.userId.value) {
-      this.error.set('اختاري الإداري واكتبي كلمة مرور جديدة.');
-      return;
-    }
-
-    const value = this.passwordForm.getRawValue();
-    this.auth.resetPassword(value.userId, value.newPassword).subscribe({
-      next: () => {
-        this.passwordForm.reset({ userId: 0, newPassword: '' });
-        this.showMessage('تم تغيير كلمة مرور الإداري.');
-      },
-      error: () => this.error.set('تعذر تغيير كلمة المرور.')
     });
   }
 

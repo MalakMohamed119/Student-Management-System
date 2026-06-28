@@ -1,0 +1,53 @@
+<header class="page-head">
+  <div>
+    <span>كشف الحصة</span>
+    <h1>تسجيل الحضور والغياب</h1>
+  </div>
+  <a class="back-link" routerLink="/attendance">رجوع للحصص</a>
+</header>
+
+<section class="panel table-panel">
+  <div class="sheet-head">
+    <div>
+      <h2>كشف الحضور</h2>
+      @if (selectedSessionDetails(); as session) {
+        <span>{{ session.groupName || 'مجموعة رقم ' + session.groupId }} - {{ session.sessionDate | appDate }} - {{ session.startTime | appTime12 }}</span>
+      }
+    </div>
+    @if (loading()) {
+      <strong>تحميل...</strong>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="sheet-error">{{ error() }}</p>
+  }
+
+  @if (message() && !attendance().length) {
+    <p class="empty-state">{{ message() }}</p>
+  }
+
+  <table>
+    <thead>
+      <tr>
+        <th>الطالب</th>
+        <th>الحالة الحالية</th>
+        <th>تسجيل</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of attendance(); track row.studentId) {
+        <tr>
+          <td>{{ row.studentName }}</td>
+          <td>{{ row.isPresent === true ? 'حاضر' : row.isPresent === false ? 'غائب' : 'لم يسجل' }}</td>
+          <td class="actions">
+            <button class="present" type="button" (click)="mark(row, true)">حاضر</button>
+            <button class="absent" type="button" (click)="mark(row, false)">غائب</button>
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="3">لا توجد أسماء للعرض حاليا.</td></tr>
+      }
+    </tbody>
+  </table>
+</section>

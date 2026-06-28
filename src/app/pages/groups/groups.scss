@@ -13,6 +13,38 @@ form,
   align-content: start;
 }
 
+.builder-panel {
+  gap: 16px;
+  background: #ffffff;
+}
+
+.builder-head {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.builder-head span,
+.field {
+  color: #64748b;
+  font-weight: 900;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.field input,
+.field textarea,
+.field select {
+  color: #111827;
+  font-size: 15px;
+  font-weight: 700;
+}
+
 .days {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -26,6 +58,9 @@ form,
   padding: 10px;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
+  background: #f8fafc;
+  color: #111827;
+  font-weight: 800;
 }
 
 .days label input[type="checkbox"] {

@@ -1,19 +1,76 @@
 <header class="page-head">
   <div>
     <span>إدارة الطلاب</span>
-    <h1>الطلاب</h1>
+    <h1>{{ isExpelledPage() ? 'الطلاب المستبعدون' : 'الطلاب' }}</h1>
   </div>
+  @if (isExpelledPage()) {
+    <a class="back-link" routerLink="/students">رجوع للطلاب</a>
+  }
 </header>
+
+@if (error()) {
+  <p class="error-text">{{ error() }}</p>
+}
 
 <section class="toolbar">
   <input placeholder="ابحث بالاسم أو رقم الهاتف" #query (input)="search(query.value)" />
+  <select [value]="groupFilter()" (change)="filterByGroup($any($event.target).value)">
+    <option value="0">كل المجموعات</option>
+    @for (group of groups(); track group.id) {
+      <option [value]="group.id">{{ group.name }}</option>
+    }
+  </select>
   <div class="tabs">
-    <button type="button" [class.active]="status() === ''" (click)="load()">الكل</button>
-    <button type="button" [class.active]="status() === 'active'" (click)="load('active')">نشط</button>
-    <button type="button" [class.active]="status() === 'expelled'" (click)="load('expelled')">مستبعد</button>
+    <button type="button" [class.active]="status() === '' && !isExpelledPage()" routerLink="/students" (click)="load()">الكل</button>
+    @if (isExpelledPage()) {
+      <button type="button" routerLink="/students">نشط</button>
+    } @else {
+      <button type="button" [class.active]="status() === 'active'" (click)="load('active')">نشط</button>
+    }
+    <button type="button" [class.active]="status() === 'expelled'" routerLink="/students/expelled">مستبعد</button>
   </div>
 </section>
 
+@if (isExpelledPage()) {
+  <section class="expelled-details-grid">
+    @for (student of students(); track student.id) {
+      <article class="panel expelled-card">
+        <div class="expelled-card-head">
+          <div>
+            <span class="badge warn">مستبعد</span>
+            <h2>{{ student.name }}</h2>
+          </div>
+          <button class="ghost" type="button" (click)="openStudent(student)">عرض السجل</button>
+        </div>
+
+        <div class="details-grid">
+          <span><b>هاتف الطالب</b>{{ student.studentPhone || '-' }}</span>
+          <span><b>ولي الأمر</b>{{ student.guardianPhone || '-' }}</span>
+          <span><b>النوع</b>{{ student.gender === 'Male' ? 'ذكر' : 'أنثى' }}</span>
+          <span><b>المجموعة</b>{{ groupName(student.groupId) }}</span>
+          <span><b>أيام الغياب</b>{{ absenceDaysFor(student) }}</span>
+          <span><b>الحالة</b>مستبعد</span>
+        </div>
+
+        <div class="detail-section">
+          <h3>الملاحظات</h3>
+          <p>{{ studentNotes(student) || 'لا توجد ملاحظات.' }}</p>
+        </div>
+
+        <div class="detail-section reason-section">
+          <h3>سبب الاستبعاد</h3>
+          @for (reason of expulsionReasons(student); track reason) {
+            <p>{{ reason }}</p>
+          } @empty {
+            <p>لا يوجد سبب محفوظ لهذا الطالب.</p>
+          }
+        </div>
+      </article>
+    } @empty {
+      <p class="panel">لا يوجد طلاب مستبعدون حاليا.</p>
+    }
+  </section>
+} @else {
 <section class="layout">
   <form class="panel" [formGroup]="form" (ngSubmit)="save()">
     <h2>{{ editingStudentId() ? 'تعديل طالب' : 'إضافة طالب' }}</h2>
@@ -54,7 +111,9 @@
       <tbody>
         @for (student of students(); track student.id) {
           <tr>
-            <td>{{ student.name }}</td>
+            <td>
+              <button class="link-button" type="button" (click)="openStudent(student)">{{ student.name }}</button>
+            </td>
             <td>
               @if (whatsappUrl(student.studentPhone); as url) {
                 <a class="phone-link" [href]="url" target="_blank" rel="noopener">{{ student.studentPhone }}</a>
@@ -77,6 +136,7 @@
             </td>
             <td class="row-actions">
               <button class="ghost" type="button" (click)="editStudent(student)">تعديل</button>
+              <button class="ghost" type="button" (click)="openTransfer(student)">نقل</button>
               <button class="ghost" type="button" (click)="toggleStatus(student)">
                 {{ student.status === 'expelled' ? 'تفعيل' : 'استبعاد' }}
               </button>
@@ -94,3 +154,83 @@
     </table>
   </div>
 </section>
+}
+
+@if (expelTarget(); as student) {
+  <div class="modal-backdrop" (click)="closeExpel()">
+    <section class="modal" (click)="$event.stopPropagation()">
+      <h2>سبب الاستبعاد</h2>
+      <p>اكتبي سبب استبعاد {{ student.name }} قبل تنفيذ العملية.</p>
+      <textarea [value]="expelReason()" (input)="expelReason.set($any($event.target).value)" placeholder="سبب الاستبعاد"></textarea>
+      <div class="modal-actions">
+        <button type="button" (click)="confirmExpel()">استبعاد</button>
+        <button class="ghost" type="button" (click)="closeExpel()">إلغاء</button>
+      </div>
+    </section>
+  </div>
+}
+
+@if (transferTarget(); as student) {
+  <div class="modal-backdrop" (click)="closeTransfer()">
+    <section class="modal" (click)="$event.stopPropagation()">
+      <h2>نقل الطالب</h2>
+      <p>اختاري المجموعة الجديدة للطالب {{ student.name }}.</p>
+      <select [value]="transferGroupId()" (change)="transferGroupId.set(+$any($event.target).value)">
+        <option value="0">بدون مجموعة</option>
+        @for (group of groups(); track group.id) {
+          <option [value]="group.id">{{ group.name }}</option>
+        }
+      </select>
+      <div class="modal-actions">
+        <button type="button" (click)="transferStudent()">نقل الطالب</button>
+        <button class="ghost" type="button" (click)="closeTransfer()">إلغاء</button>
+      </div>
+    </section>
+  </div>
+}
+
+@if (selectedStudent(); as student) {
+  <div class="modal-backdrop" (click)="closeStudentDetails()">
+    <section class="modal student-modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <span>بيانات الطالب</span>
+          <h2>{{ student.name }}</h2>
+        </div>
+        <button class="ghost icon-button" type="button" (click)="closeStudentDetails()">x</button>
+      </div>
+
+      @if (detailsLoading()) {
+        <p class="muted">جاري تحميل التفاصيل...</p>
+      }
+
+      <div class="details-grid">
+        <span><b>هاتف الطالب</b>{{ student.studentPhone || '-' }}</span>
+        <span><b>ولي الأمر</b>{{ student.guardianPhone || '-' }}</span>
+        <span><b>النوع</b>{{ student.gender === 'Male' ? 'ذكر' : 'أنثى' }}</span>
+        <span><b>الحالة</b>{{ student.status === 'expelled' ? 'مستبعد' : 'نشط' }}</span>
+        <span><b>أيام الحضور</b>{{ presentDays() }}</span>
+        <span><b>أيام الغياب</b>{{ absentDays() }}</span>
+      </div>
+
+      <div class="detail-section">
+        <h3>المجموعات</h3>
+        <p>{{ selectedGroupNames() || groupName(student.groupId) }}</p>
+      </div>
+
+      <div class="detail-section">
+        <h3>الملاحظات</h3>
+        <p>{{ studentNotes(student) || 'لا توجد ملاحظات.' }}</p>
+      </div>
+
+      <div class="detail-section">
+        <h3>أسباب الاستبعاد</h3>
+        @for (reason of expelReasons(); track reason) {
+          <p>{{ reason }}</p>
+        } @empty {
+          <p>لا توجد أسباب مسجلة.</p>
+        }
+      </div>
+    </section>
+  </div>
+}

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { AttendanceRow, AuditLog, Session, Student, StudentGroup, SystemSettings } from '../models/api.models';
+import { AttendanceRow, AuditLog, Session, Student, StudentAttendanceRecord, StudentGroup, SystemSettings } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -11,6 +11,10 @@ export class ApiService {
   getStudents(status?: string) {
     const params = status ? new HttpParams().set('status', status) : undefined;
     return this.http.get<Student[]>(`${this.api}/Students`, { params });
+  }
+
+  getStudent(id: number) {
+    return this.http.get<Student>(`${this.api}/Students/${id}`);
   }
 
   searchStudents(query: string) {
@@ -67,12 +71,24 @@ export class ApiService {
     return this.http.post(`${this.api}/Groups/enroll`, null, { params: { studentId, groupId } });
   }
 
+  unenrollStudent(studentId: number, groupId: number) {
+    return this.http.post(`${this.api}/Groups/unenroll`, null, { params: { studentId, groupId } });
+  }
+
   getGroupStudents(groupId: number) {
     return this.http.get<Student[]>(`${this.api}/Groups/${groupId}/students`);
   }
 
+  getStudentGroups(studentId: number) {
+    return this.http.get<StudentGroup[]>(`${this.api}/Groups/student/${studentId}`);
+  }
+
   getUpcomingSessions() {
     return this.http.get<Session[]>(`${this.api}/Sessions/upcoming`);
+  }
+
+  getSession(sessionId: number) {
+    return this.http.get<Session>(`${this.api}/Sessions/${sessionId}`);
   }
 
   generateSessions(groupId: number, daysAhead = 14) {
@@ -85,6 +101,10 @@ export class ApiService {
 
   getSessionAttendance(sessionId: number) {
     return this.http.get<AttendanceRow[]>(`${this.api}/Sessions/${sessionId}/attendance`);
+  }
+
+  getStudentAttendance(studentId: number) {
+    return this.http.get<StudentAttendanceRecord[]>(`${this.api}/Sessions/student/${studentId}/attendance`);
   }
 
   markAttendance(sessionId: number, studentId: number, isPresent: boolean) {
@@ -102,6 +122,14 @@ export class ApiService {
   getLogs(username?: string) {
     const params = username ? new HttpParams().set('username', username) : undefined;
     return this.http.get<AuditLog[]>(`${this.api}/Logs`, { params });
+  }
+
+  getEntityLogs(entityType: string, entityId?: number) {
+    let params = new HttpParams().set('entityType', entityType);
+    if (entityId) {
+      params = params.set('entityId', entityId);
+    }
+    return this.http.get<AuditLog[]>(`${this.api}/Logs/entity`, { params });
   }
 
   downloadBackup() {

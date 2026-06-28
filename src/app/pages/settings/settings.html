@@ -7,17 +7,7 @@
 
 <section class="settings-layout">
   <aside class="profile-card">
-    <label class="avatar-upload">
-      <span class="avatar">
-        @if (photoUrl() && !imageFailed()) {
-          <img [src]="photoUrl()" alt="" (error)="imageFailed.set(true)" />
-        } @else {
-          <span>{{ fallbackInitial() }}</span>
-        }
-      </span>
-      <span class="upload-text">تغيير الصورة</span>
-      <input type="file" accept="image/*" (change)="uploadPhoto($any($event.target).files?.[0])" />
-    </label>
+    <span class="avatar">{{ fallbackInitial() }}</span>
 
     <div class="profile-summary">
       <strong>{{ form.controls.fullName.value || auth.user()?.username }}</strong>

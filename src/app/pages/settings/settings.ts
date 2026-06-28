@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
-import { environment } from '../../../environments/environment';
 
 function cleanName(value: string): string {
   return value
@@ -21,13 +20,10 @@ export class SettingsPage {
   readonly auth = inject(AuthService);
   readonly saved = signal('');
   readonly error = signal('');
-  readonly imageFailed = signal(false);
-  readonly previewImage = signal('');
 
   readonly form = this.fb.nonNullable.group({
     fullName: [cleanName(this.auth.user()?.fullName ?? ''), Validators.required],
-    phone: [this.auth.user()?.phone ?? '', Validators.required],
-    imageUrl: [this.auth.user()?.imageUrl ?? '']
+    phone: [this.auth.user()?.phone ?? '', Validators.required]
   });
 
   readonly displayName = computed(() => {
@@ -43,51 +39,13 @@ export class SettingsPage {
     }
 
     const value = this.form.getRawValue();
-    const payload = { ...value, fullName: cleanName(value.fullName) };
+    const payload = { fullName: cleanName(value.fullName), phone: value.phone };
     this.form.controls.fullName.setValue(payload.fullName);
 
     this.auth.updateProfile(payload).subscribe({
       next: () => this.showSaved('تم حفظ بيانات الحساب.'),
       error: () => this.error.set('تعذر حفظ بيانات الحساب.')
     });
-  }
-
-  uploadPhoto(file: File | null | undefined) {
-    if (!file) {
-      return;
-    }
-
-    this.previewImage.set(URL.createObjectURL(file));
-    this.imageFailed.set(false);
-
-    this.auth.uploadProfilePhoto(file).subscribe({
-      next: ({ url }) => {
-        this.imageFailed.set(false);
-        this.form.controls.imageUrl.setValue(url);
-        this.save();
-      },
-      error: () => this.error.set('تعذر رفع الصورة.')
-    });
-  }
-
-  photoUrl() {
-    if (this.previewImage()) {
-      return this.previewImage();
-    }
-
-    const value = this.form.controls.imageUrl.value.trim().replace(/\\/g, '/');
-    if (!value) {
-      return '';
-    }
-
-    if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:')) {
-      return value;
-    }
-
-    const apiUrl =
-      window.location.protocol === 'https:' ? environment.apiUrl.replace(/^http:\/\//, 'https://') : environment.apiUrl;
-
-    return `${apiUrl}${value.startsWith('/') ? value : `/${value}`}`;
   }
 
   fallbackInitial() {

@@ -6,10 +6,21 @@
 </header>
 
 <section class="layout">
-  <form class="panel" [formGroup]="form" (ngSubmit)="save()">
-    <h2>مجموعة جديدة</h2>
-    <input formControlName="name" placeholder="اسم المجموعة" />
-    <textarea formControlName="description" placeholder="وصف مختصر"></textarea>
+  <form class="panel builder-panel" [formGroup]="form" (ngSubmit)="save()">
+    <div class="builder-head">
+      <span>إعداد المجموعة</span>
+      <h2>مجموعة جديدة</h2>
+    </div>
+
+    <label class="field">
+      اسم المجموعة
+      <input formControlName="name" placeholder="مثال: أولى ثانوي - السبت" />
+    </label>
+
+    <label class="field">
+      وصف مختصر
+      <textarea formControlName="description" placeholder="ملاحظات عن المستوى أو المكان"></textarea>
+    </label>
 
     <div class="days">
       @for (day of weekdays; track day.value) {
@@ -21,12 +32,12 @@
     </div>
 
     <div class="time-grid">
-      <label>
-        بداية الوقت
+      <label class="field">
+        بداية الحصة
         <app-time-picker formControlName="startTime" />
       </label>
-      <label>
-        نهاية الوقت
+      <label class="field">
+        نهاية الحصة
         <app-time-picker formControlName="endTime" />
       </label>
     </div>
@@ -41,7 +52,7 @@
             <h2>{{ group.name }}</h2>
             <p>{{ group.description || 'بدون وصف' }}</p>
           </div>
-          <strong>{{ group.studentCount }} طالب</strong>
+          <strong>{{ activeStudentCount(group.id) }} طالب</strong>
         </div>
         <div class="schedule">
           @for (day of group.groupDays; track day.id) {

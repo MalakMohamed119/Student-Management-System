@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -7,7 +8,7 @@ import { AppDatePipe, AppTime12Pipe } from '../../shared/date-time-format.pipe';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [AppDatePipe, AppTime12Pipe],
+  imports: [AppDatePipe, AppTime12Pipe, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
@@ -19,6 +20,7 @@ export class DashboardPage {
   readonly sessions = signal<Session[]>([]);
   readonly loading = signal(true);
   readonly error = signal('');
+  readonly expelledStudents = computed(() => this.students().filter((student) => student.status === 'expelled'));
 
   constructor() {
     this.loadDashboard();
@@ -47,6 +49,10 @@ export class DashboardPage {
   }
 
   expelledCount() {
-    return this.students().filter((student) => student.status === 'expelled').length;
+    return this.expelledStudents().length;
+  }
+
+  activeStudentCount(groupId: number) {
+    return this.students().filter((student) => student.groupId === groupId && student.status !== 'expelled').length;
   }
 }

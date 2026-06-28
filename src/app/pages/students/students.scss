@@ -28,8 +28,152 @@ form {
   text-decoration: underline;
 }
 
+.toolbar select {
+  max-width: 240px;
+}
+
+.back-link {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 0 14px;
+  background: #e4dfcf;
+  color: #0f172a;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.link-button {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+  color: #0f766e;
+  text-align: right;
+}
+
+.link-button:hover {
+  color: #115e59;
+  text-decoration: underline;
+}
+
+.error-text {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 900;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.modal {
+  width: min(560px, 100%);
+  max-height: min(760px, 92vh);
+  overflow: auto;
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+}
+
+.student-modal {
+  width: min(760px, 100%);
+}
+
+.expelled-details-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.expelled-card {
+  display: grid;
+  gap: 14px;
+}
+
+.expelled-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.expelled-card-head h2 {
+  margin-top: 8px;
+}
+
+.reason-section {
+  border-color: #fecaca;
+  background: #fff7ed;
+}
+
+.modal p {
+  margin: 0;
+  color: #475569;
+  font-weight: 800;
+}
+
+.modal-actions,
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modal-actions {
+  justify-content: flex-start;
+}
+
+.icon-button {
+  width: 42px;
+  padding: 0;
+  font-size: 22px;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.details-grid span,
+.detail-section {
+  padding: 12px;
+  border: 1px solid #eef2f7;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.details-grid b,
+.detail-section h3 {
+  display: block;
+  margin: 0 0 6px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.muted {
+  color: #64748b;
+}
+
 @media (max-width: 1050px) {
   .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .details-grid {
     grid-template-columns: 1fr;
   }
 }

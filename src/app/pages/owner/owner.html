@@ -110,7 +110,7 @@
       <input formControlName="fullName" placeholder="&#1575;&#1604;&#1575;&#1587;&#1605; &#1575;&#1604;&#1603;&#1575;&#1605;&#1604;" />
       <input formControlName="username" placeholder="&#1575;&#1587;&#1605; &#1575;&#1604;&#1605;&#1587;&#1578;&#1582;&#1583;&#1605;" />
       <input formControlName="phone" placeholder="&#1585;&#1602;&#1605; &#1575;&#1604;&#1607;&#1575;&#1578;&#1601;" />
-      <input formControlName="password" type="password" placeholder="&#1603;&#1604;&#1605;&#1577; &#1575;&#1604;&#1605;&#1585;&#1608;&#1585;" />
+      <input formControlName="password" inputmode="numeric" maxlength="4" placeholder="PIN" />
       <button type="submit">إنشاء حساب إداري</button>
     </form>
 
@@ -143,18 +143,6 @@
         </tbody>
       </table>
     </section>
-
-    <form class="panel form-panel" [formGroup]="passwordForm" (ngSubmit)="resetPassword()">
-      <h2>&#1578;&#1594;&#1610;&#1610;&#1585; &#1603;&#1604;&#1605;&#1577; &#1575;&#1604;&#1605;&#1585;&#1608;&#1585;</h2>
-      <select formControlName="userId">
-        <option [ngValue]="0">اختاري الإداري</option>
-        @for (assistant of assistants(); track assistant.id ?? assistant.username) {
-          <option [ngValue]="assistant.id">{{ assistant.fullName || assistant.username }}</option>
-        }
-      </select>
-      <input formControlName="newPassword" type="password" placeholder="&#1603;&#1604;&#1605;&#1577; &#1575;&#1604;&#1605;&#1585;&#1608;&#1585; &#1575;&#1604;&#1580;&#1583;&#1610;&#1583;&#1577;" />
-      <button type="submit">&#1578;&#1594;&#1610;&#1610;&#1585; &#1603;&#1604;&#1605;&#1577; &#1575;&#1604;&#1605;&#1585;&#1608;&#1585;</button>
-    </form>
 
     <form class="panel form-panel" [formGroup]="pinForm" (ngSubmit)="resetPin()">
       <h2>&#1578;&#1594;&#1610;&#1610;&#1585; PIN</h2>
