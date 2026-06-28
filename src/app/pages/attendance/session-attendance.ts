@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
-import { AttendanceRow, Session, Student } from '../../core/models/api.models';
+import { AttendanceRow, Session, Student, StudentAttendanceRecord } from '../../core/models/api.models';
+import { catchError, of } from 'rxjs';
 import { AppDatePipe, AppTime12Pipe } from '../../shared/date-time-format.pipe';
 
 @Component({
@@ -53,9 +54,74 @@ export class SessionAttendancePage {
         this.attendance.update((rows) =>
           rows.map((item) => (item.studentId === row.studentId ? { ...item, isPresent } : item))
         );
+
+        if (!isPresent) {
+          this.checkAutoExpelAfterAbsence(row.studentId);
+        }
       },
       error: () => this.error.set('تعذر تسجيل الحضور. جربي مرة أخرى.')
     });
+  }
+
+  private checkAutoExpelAfterAbsence(studentId: number) {
+    this.api.getStudent(studentId).subscribe({
+      next: (student) => {
+        if (student.status === 'expelled') {
+          return;
+        }
+
+        const consecutive = student.consecutiveAbsences ?? 0;
+        if (consecutive >= 3) {
+          this.expelStudentAutomatically(studentId);
+          return;
+        }
+
+        if (student.consecutiveAbsences == null) {
+          this.api
+            .getStudentAttendance(studentId)
+            .pipe(catchError(() => of([] as StudentAttendanceRecord[])))
+            .subscribe((records) => {
+              if (this.computeConsecutiveAbsences(records) >= 3) {
+                this.expelStudentAutomatically(studentId);
+              }
+            });
+        }
+      }
+    });
+  }
+
+  private expelStudentAutomatically(studentId: number) {
+    this.api.expelStudent(studentId, 'استبعاد تلقائي بعد 3 أيام غياب متتالية').subscribe({
+      next: () => {
+        this.message.set('تم استبعاد الطالب تلقائياً بعد 3 أيام غياب متتالية.');
+        this.attendance.update((rows) =>
+          rows.map((item) =>
+            item.studentId === studentId ? { ...item, status: 'expelled' as const, isPresent: false } : item
+          )
+        );
+      },
+      error: () => this.error.set('تعذر استبعاد الطالب تلقائياً.')
+    });
+  }
+
+  private computeConsecutiveAbsences(records: StudentAttendanceRecord[]) {
+    const sorted = [...records]
+      .filter((record) => record.sessionDate)
+      .sort((a, b) =>
+        new Date(`${b.sessionDate} ${b.startTime ?? ''}`).getTime() -
+        new Date(`${a.sessionDate} ${a.startTime ?? ''}`).getTime()
+      );
+
+    let count = 0;
+    for (const record of sorted) {
+      if (!record.isPresent) {
+        count += 1;
+      } else {
+        break;
+      }
+    }
+
+    return count;
   }
 
   selectedSessionDetails() {

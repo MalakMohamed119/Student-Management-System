@@ -140,9 +140,6 @@
               <button class="ghost" type="button" (click)="toggleStatus(student)">
                 {{ student.status === 'expelled' ? 'تفعيل' : 'استبعاد' }}
               </button>
-              @if (auth.isOwner()) {
-                <button class="danger" type="button" (click)="deleteStudent(student)">حذف نهائي</button>
-              }
             </td>
           </tr>
         } @empty {
