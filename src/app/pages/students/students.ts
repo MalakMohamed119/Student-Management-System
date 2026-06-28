@@ -111,19 +111,28 @@ export class StudentsPage {
     const editingId = this.editingStudentId();
     const previousGroupId = editingId ? this.students().find((student) => student.id === editingId)?.groupId ?? 0 : 0;
     const nextGroupId = value.groupId || 0;
-    const payload = {
+    const studentPayload = {
       name: value.name.trim(),
       studentPhone: value.studentPhone.trim(),
       guardianPhone: value.guardianPhone.trim(),
       gender: value.gender,
       notes: this.cleanStudentNotes(value.notes)
     };
-    const request = editingId ? this.api.updateStudent(editingId, payload) : this.api.createStudent(payload);
+    const createPayload = nextGroupId ? { ...studentPayload, groupId: nextGroupId } : studentPayload;
+    const request = editingId ? this.api.updateStudent(editingId, studentPayload) : this.api.createStudent(createPayload);
 
     request.subscribe({
-      next: (student) => this.syncStudentGroup(student.id || editingId, previousGroupId, nextGroupId),
+      next: (student) => {
+        if (!editingId) {
+          this.finishSave();
+          return;
+        }
+
+        this.syncStudentGroup(student.id || editingId, previousGroupId, nextGroupId);
+      },
       error: (error: HttpErrorResponse) => {
         const message = this.apiErrorMessage(error, 'تعذر حفظ بيانات الطالب.');
+        console.error('Student save failed', error);
         this.error.set(message);
         this.toast.error(message);
       }
