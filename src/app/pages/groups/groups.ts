@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -16,6 +17,7 @@ import { TimePicker } from '../../shared/time-picker/time-picker';
 export class GroupsPage {
   private readonly api = inject(ApiService);
   private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
   readonly auth = inject(AuthService);
   readonly groups = signal<StudentGroup[]>([]);
   readonly students = signal<Student[]>([]);
@@ -68,6 +70,10 @@ export class GroupsPage {
 
   activeStudentCount(groupId: number) {
     return this.students().filter((student) => student.groupId === groupId && student.status !== 'expelled').length;
+  }
+
+  openGroup(groupId: number) {
+    this.router.navigate(['/groups', groupId]);
   }
 
   generate(groupId: number) {

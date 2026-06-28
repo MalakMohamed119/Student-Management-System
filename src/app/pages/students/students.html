@@ -217,7 +217,7 @@
 
       <div class="detail-section absence-dates">
         <h3>تواريخ الغياب</h3>
-        @for (record of absentAttendanceRecords(); track record.id ?? record.sessionId ?? record.sessionDate) {
+        @for (record of absentAttendanceRecords(); track record.id ?? record.sessionId ?? record.sessionDate + '-' + record.startTime) {
           <p>
             <b>{{ record.sessionDate | appDate }}</b>
             @if (record.startTime) {

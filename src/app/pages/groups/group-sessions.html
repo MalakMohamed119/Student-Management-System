@@ -1,0 +1,117 @@
+<header class="page-head">
+  <div>
+    <span>حصص المجموعة</span>
+    <h1>{{ group()?.name || 'مجموعة رقم ' + groupId }}</h1>
+  </div>
+  <a class="back-link" routerLink="/groups">رجوع للمجموعات</a>
+</header>
+
+@if (error()) {
+  <p class="sheet-error">{{ error() }}</p>
+}
+
+<section class="metrics">
+  <article>
+    <span>الطلاب</span>
+    <strong>{{ students().length }}</strong>
+  </article>
+  <article>
+    <span>النشطين</span>
+    <strong>{{ activeStudents().length }}</strong>
+  </article>
+  <article>
+    <span>المستبعدين</span>
+    <strong>{{ expelledStudents().length }}</strong>
+  </article>
+  <article>
+    <span>الحصص</span>
+    <strong>{{ sessionSummaries().length }}</strong>
+  </article>
+</section>
+
+<section class="layout">
+  <div class="panel table-panel">
+    <div class="section-head">
+      <div>
+        <h2>الحصص</h2>
+        @if (loading()) {
+          <span>تحميل...</span>
+        }
+      </div>
+      <div class="totals">
+        <span><b>حضور</b>{{ totalPresent() }}</span>
+        <span><b>غياب</b>{{ totalAbsent() }}</span>
+        <span><b>كلي</b>{{ totalRegistered() }}</span>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>التاريخ</th>
+          <th>الوقت</th>
+          <th>حاضر</th>
+          <th>غائب</th>
+          <th>الكلي</th>
+          <th>الكشف</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of sessionSummaries(); track item.session.id) {
+          <tr>
+            <td>{{ item.session.sessionDate | appDate }}</td>
+            <td>{{ item.session.startTime | appTime12 }}</td>
+            <td>{{ item.present }}</td>
+            <td>{{ item.absent }}</td>
+            <td>{{ item.total }}</td>
+            <td>
+              <a class="table-link" [routerLink]="['/attendance', item.session.id]" [queryParams]="{ groupId }">فتح</a>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6">لا توجد حصص لهذه المجموعة حاليا.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel table-panel">
+    <div class="section-head">
+      <div>
+        <h2>الطلاب</h2>
+        <span>{{ students().length }} طالب</span>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>هاتف الطالب</th>
+          <th>ولي الأمر</th>
+          <th>الحالة</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (student of students(); track student.id) {
+          <tr>
+            <td>{{ student.name }}</td>
+            <td>{{ student.studentPhone || '-' }}</td>
+            <td>{{ student.guardianPhone || '-' }}</td>
+            <td>
+              <span class="badge" [class.warn]="student.status === 'expelled'">
+                {{ student.status === 'expelled' ? 'مستبعد' : 'نشط' }}
+              </span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4">لا توجد بيانات طلاب لهذه المجموعة.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

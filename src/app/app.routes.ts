@@ -30,6 +30,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/students/students').then((m) => m.StudentsPage)
       },
       {
+        path: 'groups/:id',
+        canActivate: [adminGuard],
+        loadComponent: () => import('./pages/groups/group-sessions').then((m) => m.GroupSessionsPage)
+      },
+      {
         path: 'groups',
         canActivate: [adminGuard],
         loadComponent: () => import('./pages/groups/groups').then((m) => m.GroupsPage)

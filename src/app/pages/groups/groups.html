@@ -46,7 +46,7 @@
 
   <div class="cards">
     @for (group of groups(); track group.id) {
-      <article class="panel">
+      <article class="panel group-card" role="button" tabindex="0" (click)="openGroup(group.id)" (keydown.enter)="openGroup(group.id)">
         <div class="card-head">
           <div>
             <h2>{{ group.name }}</h2>
@@ -60,9 +60,9 @@
           }
         </div>
         <div class="row-actions">
-          <button class="ghost" type="button" (click)="generate(group.id)">توليد حصص 30 يوم</button>
+          <button class="ghost" type="button" (click)="$event.stopPropagation(); generate(group.id)">توليد حصص 30 يوم</button>
           @if (auth.isOwner()) {
-            <button class="danger" type="button" (click)="deleteGroup(group)">حذف المجموعة</button>
+            <button class="danger" type="button" (click)="$event.stopPropagation(); deleteGroup(group)">حذف المجموعة</button>
           }
         </div>
       </article>
