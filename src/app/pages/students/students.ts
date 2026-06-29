@@ -522,7 +522,15 @@ export class StudentsPage {
 
   private toAttendanceValue(record: StudentAttendanceRecord): boolean | null {
     const source = record as unknown as Record<string, unknown>;
-    const value = source['isPresent'] ?? source['IsPresent'] ?? source['present'] ?? source['Present'] ?? source['attendanceStatus'] ?? source['AttendanceStatus'];
+    const value =
+      source['isPresent'] ??
+      source['IsPresent'] ??
+      source['present'] ??
+      source['Present'] ??
+      source['attendanceStatus'] ??
+      source['AttendanceStatus'] ??
+      source['status'] ??
+      source['Status'];
 
     if (typeof value === 'boolean') {
       return value;
@@ -530,6 +538,14 @@ export class StudentsPage {
 
     if (typeof value === 'number') {
       return value === 1 ? true : value === 0 ? false : null;
+    }
+
+    if (typeof value === 'string' && ['attended', 'yes'].includes(value.trim().toLowerCase())) {
+      return true;
+    }
+
+    if (typeof value === 'string' && ['missed', 'no'].includes(value.trim().toLowerCase())) {
+      return false;
     }
 
     if (typeof value === 'string') {

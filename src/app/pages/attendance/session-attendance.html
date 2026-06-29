@@ -27,6 +27,31 @@
     </div>
   }
 
+  @if (attendance().length) {
+    <div class="attendance-filters" aria-label="فلتر الحضور">
+      <div class="filter-tabs">
+        <button type="button" [class.active]="attendanceFilter() === 'all'" (click)="setAttendanceFilter('all')">
+          الكل <b>{{ totalCount() }}</b>
+        </button>
+        <button type="button" [class.active]="attendanceFilter() === 'present'" (click)="setAttendanceFilter('present')">
+          حاضر <b>{{ presentCount() }}</b>
+        </button>
+        <button type="button" [class.active]="attendanceFilter() === 'absent'" (click)="setAttendanceFilter('absent')">
+          غائب <b>{{ absentCount() }}</b>
+        </button>
+        <button type="button" [class.active]="attendanceFilter() === 'unmarked'" (click)="setAttendanceFilter('unmarked')">
+          لم يسجل <b>{{ unmarkedCount() }}</b>
+        </button>
+      </div>
+      <input
+        type="search"
+        [value]="nameFilter()"
+        (input)="setNameFilter($any($event.target).value)"
+        placeholder="ابحثي باسم الطالب"
+      />
+    </div>
+  }
+
   @if (error()) {
     <p class="sheet-error">{{ error() }}</p>
   }
@@ -44,7 +69,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (row of attendance(); track row.studentId) {
+      @for (row of filteredAttendance(); track row.studentId) {
         <tr>
           <td>{{ row.studentName }}</td>
           <td>{{ row.isPresent === true ? 'حاضر' : row.isPresent === false ? 'غائب' : 'لم يسجل' }}</td>

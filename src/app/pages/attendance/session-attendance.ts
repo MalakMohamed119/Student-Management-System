@@ -9,12 +9,22 @@ import { AppDatePipe, AppTime12Pipe } from '../../shared/date-time-format.pipe';
 type AttendanceApiRow = AttendanceRow & {
   StudentId?: number;
   StudentName?: string;
+  Name?: string;
   IsPresent?: boolean | string | number | null;
   present?: boolean | string | number | null;
   Present?: boolean | string | number | null;
   attendanceStatus?: string | null;
   AttendanceStatus?: string | null;
+  Status?: string;
 };
+
+type StudentApiRow = Student & {
+  Id?: number;
+  Name?: string;
+  Status?: string;
+};
+
+type AttendanceFilter = 'all' | 'present' | 'absent' | 'unmarked';
 
 @Component({
   selector: 'app-session-attendance',
@@ -31,6 +41,8 @@ export class SessionAttendancePage {
   readonly groupId = Number(this.route.snapshot.queryParamMap.get('groupId') ?? 0);
   readonly sessions = signal<Session[]>([]);
   readonly attendance = signal<AttendanceRow[]>([]);
+  readonly attendanceFilter = signal<AttendanceFilter>('all');
+  readonly nameFilter = signal('');
   readonly localAttendance = signal<Record<number, boolean>>({});
   readonly savingStudentIds = signal<number[]>([]);
   readonly loading = signal(true);
@@ -38,7 +50,23 @@ export class SessionAttendancePage {
   readonly error = signal('');
   readonly presentCount = computed(() => this.attendance().filter((row) => row.isPresent === true).length);
   readonly absentCount = computed(() => this.attendance().filter((row) => row.isPresent === false).length);
+  readonly unmarkedCount = computed(() => this.attendance().filter((row) => row.isPresent === null).length);
   readonly totalCount = computed(() => this.attendance().length);
+  readonly filteredAttendance = computed(() => {
+    const filter = this.attendanceFilter();
+    const search = this.nameFilter().trim().toLowerCase();
+
+    return this.attendance().filter((row) => {
+      const matchesStatus =
+        filter === 'all' ||
+        (filter === 'present' && row.isPresent === true) ||
+        (filter === 'absent' && row.isPresent === false) ||
+        (filter === 'unmarked' && row.isPresent === null);
+      const matchesName = !search || row.studentName.toLowerCase().includes(search);
+
+      return matchesStatus && matchesName;
+    });
+  });
 
   constructor() {
     this.load();
@@ -92,6 +120,14 @@ export class SessionAttendancePage {
     return this.savingStudentIds().includes(studentId);
   }
 
+  setAttendanceFilter(filter: AttendanceFilter) {
+    this.attendanceFilter.set(filter);
+  }
+
+  setNameFilter(value: string) {
+    this.nameFilter.set(value);
+  }
+
   selectedSessionDetails() {
     return this.sessions().find((session) => session.id === this.sessionId) ?? null;
   }
@@ -134,7 +170,10 @@ export class SessionAttendancePage {
   private loadAttendanceOnly(savedStudentId?: number) {
     this.api.getSessionAttendance(this.sessionId).subscribe({
       next: (rows) => {
-        this.attendance.set(this.applyLocalAttendance(rows.map((row) => this.normalizeAttendanceRow(row as AttendanceApiRow))));
+        const normalizedRows = rows
+          .map((row) => this.normalizeAttendanceRow(row as AttendanceApiRow))
+          .filter((row) => row.status !== 'expelled');
+        this.attendance.set(this.applyLocalAttendance(normalizedRows));
         this.message.set(rows.length ? '' : 'الحصة غير موجودة.');
         this.loading.set(false);
         this.finishSaving(savedStudentId);
@@ -152,14 +191,19 @@ export class SessionAttendancePage {
   private mergeAttendanceRows(students: Student[], rows: AttendanceRow[]) {
     const normalizedRows = rows.map((row) => this.normalizeAttendanceRow(row as AttendanceApiRow));
     const rowsByStudent = new Map(normalizedRows.map((row) => [row.studentId, row]));
-    const studentRows = students.map((student) => ({
-      ...this.toAttendanceRow(student),
-      ...(rowsByStudent.get(student.id) ?? {})
-    }));
-    const existingIds = new Set(students.map((student) => student.id));
-    const extraRows = normalizedRows.filter((row) => !existingIds.has(row.studentId));
+    const activeStudents = students.filter((student) => this.studentStatus(student) !== 'expelled');
+    const studentRows = activeStudents.map((student) => {
+      const baseRow = this.toAttendanceRow(student);
+      const apiRow = rowsByStudent.get(baseRow.studentId);
 
-    return [...studentRows, ...extraRows];
+      return {
+        ...baseRow,
+        isPresent: apiRow?.isPresent ?? baseRow.isPresent,
+        status: apiRow?.status ?? baseRow.status
+      };
+    });
+
+    return studentRows;
   }
 
   private setLocalAttendance(studentId: number, isPresent: boolean) {
@@ -188,22 +232,54 @@ export class SessionAttendancePage {
 
   private toAttendanceRow(student: Student): AttendanceRow {
     return {
-      studentId: student.id,
-      studentName: student.name,
+      studentId: this.studentId(student),
+      studentName: this.studentName(student),
       isPresent: null,
-      status: student.status
+      status: this.studentStatus(student)
     };
   }
 
   private normalizeAttendanceRow(row: AttendanceApiRow): AttendanceRow {
+    const rawStatus = row.status ?? row.Status;
+
     return {
       studentId: Number(row.studentId ?? row.StudentId ?? 0),
-      studentName: row.studentName ?? row.StudentName ?? '',
+      studentName: row.studentName ?? row.StudentName ?? row.Name ?? '',
       isPresent: this.toAttendanceValue(
-        row.isPresent ?? row.IsPresent ?? row.present ?? row.Present ?? row.attendanceStatus ?? row.AttendanceStatus
+        row.isPresent ??
+          row.IsPresent ??
+          row.present ??
+          row.Present ??
+          row.attendanceStatus ??
+          row.AttendanceStatus ??
+          rawStatus
       ),
-      status: row.status
+      status: this.toStudentStatus(rawStatus)
     };
+  }
+
+  private studentId(student: Student) {
+    const source = student as StudentApiRow;
+    return Number(source.id ?? source.Id ?? 0);
+  }
+
+  private studentName(student: Student) {
+    const source = student as StudentApiRow;
+    return source.name ?? source.Name ?? '';
+  }
+
+  private studentStatus(student: Student) {
+    const source = student as StudentApiRow;
+    return this.toStudentStatus(source.status ?? source.Status);
+  }
+
+  private toStudentStatus(value: unknown): Student['status'] {
+    if (typeof value !== 'string') {
+      return undefined;
+    }
+
+    const normalized = value.trim().toLowerCase();
+    return normalized === 'active' || normalized === 'expelled' ? normalized : undefined;
   }
 
   private toAttendanceValue(value: boolean | string | number | null | undefined): boolean | null {
@@ -213,6 +289,14 @@ export class SessionAttendancePage {
 
     if (typeof value === 'number') {
       return value === 1 ? true : value === 0 ? false : null;
+    }
+
+    if (typeof value === 'string' && ['attended', 'yes'].includes(value.trim().toLowerCase())) {
+      return true;
+    }
+
+    if (typeof value === 'string' && ['missed', 'no'].includes(value.trim().toLowerCase())) {
+      return false;
     }
 
     if (typeof value === 'string') {

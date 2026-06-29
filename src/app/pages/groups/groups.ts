@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -22,7 +23,7 @@ export class GroupsPage {
   private readonly toast = inject(ToastService);
   readonly auth = inject(AuthService);
   readonly groups = signal<StudentGroup[]>([]);
-  readonly students = signal<Student[]>([]);
+  readonly groupActiveStudentCounts = signal<Record<number, number>>({});
   readonly weekdays = [
     { value: 1, label: 'الإثنين' },
     { value: 2, label: 'الثلاثاء' },
@@ -46,12 +47,29 @@ export class GroupsPage {
   }
 
   load() {
-    forkJoin({
-      groups: this.api.getGroups(),
-      students: this.api.getStudents()
-    }).subscribe(({ groups, students }) => {
+    this.api.getGroups().pipe(
+      switchMap((groups) => {
+        if (!groups.length) {
+          return of({ groups, counts: {} as Record<number, number> });
+        }
+
+        return forkJoin(
+          groups.map((group) =>
+            this.api.getGroupStudents(group.id).pipe(catchError(() => of([] as Student[])))
+          )
+        ).pipe(
+          switchMap((groupStudents) => {
+            const counts = groups.reduce<Record<number, number>>((result, group, index) => {
+              result[group.id] = groupStudents[index].filter((student) => student.status !== 'expelled').length;
+              return result;
+            }, {});
+            return of({ groups, counts });
+          })
+        );
+      })
+    ).subscribe(({ groups, counts }) => {
       this.groups.set(groups);
-      this.students.set(students);
+      this.groupActiveStudentCounts.set(counts);
     });
   }
 
@@ -75,7 +93,7 @@ export class GroupsPage {
   }
 
   activeStudentCount(groupId: number) {
-    return this.students().filter((student) => student.groupId === groupId && student.status !== 'expelled').length;
+    return this.groupActiveStudentCounts()[groupId] ?? this.groups().find((group) => group.id === groupId)?.studentCount ?? 0;
   }
 
   openGroup(groupId: number) {

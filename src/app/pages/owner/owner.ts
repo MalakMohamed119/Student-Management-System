@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { AuditLog, AuthUser, Session, Student, StudentGroup, SystemSettings } from '../../core/models/api.models';
@@ -25,6 +26,7 @@ export class OwnerPage {
   readonly students = signal<Student[]>([]);
   readonly groups = signal<StudentGroup[]>([]);
   readonly sessions = signal<Session[]>([]);
+  readonly groupActiveStudentCounts = signal<Record<number, number>>({});
 
   readonly loading = signal(true);
   readonly message = signal('');
@@ -57,7 +59,7 @@ export class OwnerPage {
   readonly largestGroups = computed(() =>
     this.groups()
       .slice()
-      .sort((a, b) => (b.studentCount ?? 0) - (a.studentCount ?? 0))
+      .sort((a, b) => this.activeStudentCount(b.id) - this.activeStudentCount(a.id))
   );
 
   readonly recentLogs = computed(() => this.logs().slice(0, 12));
@@ -77,14 +79,35 @@ export class OwnerPage {
       students: this.api.getStudents(),
       groups: this.api.getGroups(),
       sessions: this.api.getUpcomingSessions()
-    }).subscribe({
-      next: ({ settings, logs, assistants, students, groups, sessions }) => {
+    }).pipe(
+      switchMap(({ settings, logs, assistants, students, groups, sessions }) => {
+        if (!groups.length) {
+          return of({ settings, logs, assistants, students, groups, sessions, counts: {} as Record<number, number> });
+        }
+
+        return forkJoin(
+          groups.map((group) =>
+            this.api.getGroupStudents(group.id).pipe(catchError(() => of([] as Student[])))
+          )
+        ).pipe(
+          switchMap((groupStudents) => {
+            const counts = groups.reduce<Record<number, number>>((result, group, index) => {
+              result[group.id] = groupStudents[index].filter((student) => student.status !== 'expelled').length;
+              return result;
+            }, {});
+            return of({ settings, logs, assistants, students, groups, sessions, counts });
+          })
+        );
+      })
+    ).subscribe({
+      next: ({ settings, logs, assistants, students, groups, sessions, counts }) => {
         this.settings.set(settings);
         this.logs.set(logs);
         this.assistants.set(assistants);
         this.students.set(students);
         this.groups.set(groups);
         this.sessions.set(sessions);
+        this.groupActiveStudentCounts.set(counts);
         this.settingsForm.patchValue(settings);
       },
       error: () => this.error.set('تعذر تحميل بيانات المالك. تأكد من تسجيل الدخول بحساب المالك.'),
@@ -94,6 +117,10 @@ export class OwnerPage {
 
   expelledCount() {
     return this.students().filter((student) => student.status === 'expelled').length;
+  }
+
+  activeStudentCount(groupId: number) {
+    return this.groupActiveStudentCounts()[groupId] ?? this.groups().find((group) => group.id === groupId)?.studentCount ?? 0;
   }
 
   setSection(section: OwnerSection) {

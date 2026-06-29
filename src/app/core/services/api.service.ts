@@ -108,6 +108,11 @@ export class ApiService {
   }
 
   markAttendance(sessionId: number, studentId: number, isPresent: boolean) {
+    const params = new HttpParams()
+      .set('sessionId', sessionId)
+      .set('studentId', studentId)
+      .set('isPresent', isPresent);
+
     return this.http.post(`${this.api}/Sessions/attendance`, {
       sessionId,
       studentId,
@@ -115,7 +120,7 @@ export class ApiService {
       SessionId: sessionId,
       StudentId: studentId,
       IsPresent: isPresent
-    });
+    }, { params });
   }
 
   getSettings() {

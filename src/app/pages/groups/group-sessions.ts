@@ -101,11 +101,14 @@ export class GroupSessionsPage {
   }
 
   private toSessionSummary(session: Session, rows: AttendanceRow[]): SessionSummary {
+    const activeStudentIds = new Set(this.activeStudents().map((student) => student.id));
+    const currentRows = rows.filter((row) => activeStudentIds.has(this.rowStudentId(row)));
+
     return {
       session,
-      present: rows.filter((row) => this.toAttendanceValue(row as AttendanceApiRow) === true).length,
-      absent: rows.filter((row) => this.toAttendanceValue(row as AttendanceApiRow) === false).length,
-      total: Math.max(rows.length, this.students().length)
+      present: currentRows.filter((row) => this.toAttendanceValue(row as AttendanceApiRow) === true).length,
+      absent: currentRows.filter((row) => this.toAttendanceValue(row as AttendanceApiRow) === false).length,
+      total: this.activeStudents().length
     };
   }
 
@@ -115,7 +118,15 @@ export class GroupSessionsPage {
 
   private toAttendanceValue(row: AttendanceApiRow): boolean | null {
     const source = row as unknown as Record<string, unknown>;
-    const value = source['isPresent'] ?? source['IsPresent'] ?? source['present'] ?? source['Present'] ?? source['attendanceStatus'] ?? source['AttendanceStatus'];
+    const value =
+      source['isPresent'] ??
+      source['IsPresent'] ??
+      source['present'] ??
+      source['Present'] ??
+      source['attendanceStatus'] ??
+      source['AttendanceStatus'] ??
+      source['status'] ??
+      source['Status'];
 
     if (typeof value === 'boolean') {
       return value;
@@ -123,6 +134,14 @@ export class GroupSessionsPage {
 
     if (typeof value === 'number') {
       return value === 1 ? true : value === 0 ? false : null;
+    }
+
+    if (typeof value === 'string' && ['attended', 'yes'].includes(value.trim().toLowerCase())) {
+      return true;
+    }
+
+    if (typeof value === 'string' && ['missed', 'no'].includes(value.trim().toLowerCase())) {
+      return false;
     }
 
     if (typeof value === 'string') {
@@ -136,5 +155,10 @@ export class GroupSessionsPage {
     }
 
     return null;
+  }
+
+  private rowStudentId(row: AttendanceRow) {
+    const source = row as unknown as Record<string, unknown>;
+    return Number(source['studentId'] ?? source['StudentId'] ?? 0);
   }
 }

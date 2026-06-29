@@ -124,6 +124,35 @@ form,
   font-size: 13px;
 }
 
+.attendance-filters {
+  display: grid;
+  grid-template-columns: 1fr minmax(220px, 320px);
+  gap: 10px;
+  align-items: center;
+}
+
+.filter-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-tabs button {
+  min-height: 38px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #ffffff;
+  color: #334155;
+  font-weight: 900;
+}
+
+.filter-tabs button.active {
+  border-color: #0f766e;
+  background: #f0fdfa;
+  color: #0f766e;
+}
+
 .empty-state,
 .sheet-error {
   margin: 0 0 12px;
@@ -168,6 +197,10 @@ form,
   }
 
   .session-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-filters {
     grid-template-columns: 1fr;
   }
 }
